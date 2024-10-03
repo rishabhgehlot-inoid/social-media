@@ -39,11 +39,11 @@ const AddPost = () => {
     }
   };
   return (
-    <div className=" text-white flex justify-center items-center w-screen h-screen bg-gray-950">
-      <main className=" flex flex-col gap-3 bg-black p-5 rounded-2xl min-w-[500px] items-center">
+    <div className=" text-white flex justify-center p-3 md:items-center w-screen min-h-screen bg-gray-950">
+      <main className=" flex flex-col gap-3 bg-black p-5 rounded-2xl md:min-w-[500px] items-center">
         <h1 className=" text-5xl font-bold text-center py-9">Add Post</h1>
         {SelectedImage ? (
-          <img src={SelectedImage} alt="" className="aspect-square w-[400px]" />
+          <img src={SelectedImage} alt="" className=" md:w-[400px] rounded-2xl" />
         ) : (
           <input
             type="file"

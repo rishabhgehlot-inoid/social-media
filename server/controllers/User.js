@@ -15,7 +15,13 @@ const { generateJWTToken } = require("../services/jwtService");
 const { CreatePost, getPosts, getUserWithPosts } = require("../models/Post");
 const jwt = require("jsonwebtoken");
 const fs = require("fs");
-const { getUser, getAllUsers, getUserByUsername } = require("../models/User");
+const {
+  getUser,
+  getAllUsers,
+  getUserByUsername,
+  UpdateUser,
+} = require("../models/User");
+const { P } = require("pino");
 
 module.exports.getUser = async (req, res) => {
   const token = req.headers["token"];
@@ -58,5 +64,42 @@ module.exports.getUserByUsername = async (req, res) => {
     res.status(201).json(result);
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+};
+module.exports.UpdateUserProfileController = async (req, res) => {
+  const { username, phone_number, password, email, userId } = req.body;
+  let path = "";
+  console.log(password, "it is password");
+
+  console.log(req.file, "file");
+  console.log(
+    { username, phone_number, password, email },
+    "------------->body"
+  );
+  let hashedPassword = "";
+  if (password != null && password != "" && password != "undefined") {
+    console.log(password, "password is hashing ");
+    const salt = await bcrypt.genSalt(10);
+    hashedPassword = await bcrypt.hash(password, salt);
+  }
+  if (req.file) {
+    path = `${Date.now()}.png`;
+    fs.writeFile(`public/${path}`, req.file.buffer, (err) => {
+      if (err) throw err;
+    });
+  }
+
+  try {
+    await UpdateUser(
+      userId,
+      username,
+      phone_number,
+      hashedPassword,
+      email,
+      path
+    );
+    res.status(201).json({ message: "Profile is Updated Successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message, message: "some error" });
   }
 };

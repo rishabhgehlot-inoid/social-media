@@ -12,7 +12,7 @@ const {
 } = require("../models/Auth");
 const bcrypt = require("bcryptjs");
 const { generateJWTToken } = require("../services/jwtService");
-const { CreatePost, getPosts } = require("../models/Post");
+const { CreatePost, getPosts, LikePostModel } = require("../models/Post");
 const jwt = require("jsonwebtoken");
 const fs = require("fs");
 let randomstring = require("randomstring");
@@ -44,6 +44,16 @@ module.exports.getPostsController = async (req, res) => {
   try {
     const posts = await getPosts();
     res.status(201).json(posts);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+module.exports.setLikePost = async (req, res) => {
+  const { postId } = req.body;
+  try {
+    const result = await LikePostModel(postId);
+    res.status(201).json({ result, message: "Liked post" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

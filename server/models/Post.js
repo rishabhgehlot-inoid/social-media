@@ -26,3 +26,14 @@ module.exports.getUserWithPosts = async (phone_number) => {
     return error;
   }
 };
+
+module.exports.LikePostModel = async (postId) => {
+  try {
+    let query = `UPDATE posts SET likes = likes + 1 WHERE postId = ?;`;
+    return await db.runQuerySync(query, [postId]);
+  } catch (error) {
+    console.error("Error in LikePostModel:", error);
+    return { error: "Failed to like the post. Please try again later." };
+  }
+};
+

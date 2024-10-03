@@ -27,3 +27,34 @@ module.exports.getUserByUsername = async (username) => {
     return error;
   }
 };
+module.exports.UpdateUser = async (
+  userId,
+  username,
+  phone_number,
+  password,
+  email,
+  profile_img
+) => {
+  try {
+    let query = `UPDATE users SET username = ? ,phone_number = ?, email = ? WHERE userId = ?`;
+    console.log(password, profile_img, "----------------------?uudsjh");
+
+    if (password) {
+      query = `UPDATE users SET username = ? ,phone_number = ? ,  email = ?, password = '${password}' WHERE userId = ?`;
+    }
+    if (profile_img) {
+      query = `UPDATE users SET username = ? ,phone_number = ? , email = ? , profile_img = '${profile_img}'  WHERE userId = ?`;
+    }
+    if (profile_img && password) {
+      query = `UPDATE users SET username = ? ,phone_number = ? ,  email = ? ,password = '${password}', profile_img = '${profile_img}'  WHERE userId = ?`;
+    }
+    return await db.runQuerySync(query, [
+      username,
+      phone_number,
+      email,
+      userId,
+    ]);
+  } catch (error) {
+    return error;
+  }
+};

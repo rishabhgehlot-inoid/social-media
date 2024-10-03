@@ -9,6 +9,7 @@ import Friends from "./pages/Friends";
 import Profile from "./pages/Profile";
 import Search from "./pages/Search";
 import Chat from "./pages/Chat";
+import EditProfile from "./pages/EditProfile";
 // eslint-disable-next-line react/prop-types
 const Layout = ({ children }) => {
   return (
@@ -53,6 +54,14 @@ const App = () => {
             element={
               <Layout>
                 <Profile />
+              </Layout>
+            }
+          />
+          <Route
+            path="/editProfile/:userId"
+            element={
+              <Layout>
+                <EditProfile />
               </Layout>
             }
           />
