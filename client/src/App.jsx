@@ -16,9 +16,13 @@ import UserSideBar from "./components/UserSideBar";
 // eslint-disable-next-line react/prop-types
 const Layout = ({ children }) => {
   return (
-    <main>
+    <main className=" h-screen fixed w-screen bg-gray-900">
       <Header />
-      {children}
+      <div className=" flex">
+        <SideBar />
+        {children}
+        <UserSideBar />
+      </div>
       <Footer />
     </main>
   );
@@ -32,11 +36,7 @@ const App = () => {
             path="/"
             element={
               <Layout>
-                <div className=" flex">
-                  <SideBar />
-                  <Home />
-                  <UserSideBar />
-                </div>
+                <Home />
               </Layout>
             }
           />
@@ -83,9 +83,11 @@ const App = () => {
           <Route
             path="/chat"
             element={
-              <Layout>
+              <div className="bg-gray-900">
+                <Header />
                 <Chat />
-              </Layout>
+                <Footer />
+              </div>
             }
           />
           <Route

@@ -25,8 +25,8 @@ const Home = () => {
   }, []);
 
   return (
-    <div className=" w-full bg-gray-950 text-white">
-      <main className=" flex justify-start flex-col items-center p-4 gap-4">
+    <div className=" w-full bg-gray-900 text-white animate-fadeIn">
+      <main className=" flex justify-start flex-col items-center p-4 gap-4 overflow-y-scroll h-screen">
         {posts.length > 0 &&
           posts.map((item) => {
             return <Post post={item} key={item.postId} />;

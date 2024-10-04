@@ -114,7 +114,7 @@ const Chat = () => {
   }
 
   return (
-    <div className=" w-full h-[calc(100vh-80px)] bg-gray-950 text-white flex">
+    <div className=" w-full h-[calc(100vh-80px)] bg-gray-950 text-white flex animate-fadeIn">
       <main
         className={` md:w-[500px] w-full bg-gray-900 h-full overflow-y-scroll ${
           receiver ? " hidden md:block" : "block md:block"

@@ -26,8 +26,8 @@ const Friends = () => {
   }, []);
 
   return (
-    <div className=" w-full bg-gray-950 text-white h-screen ">
-      <main className=" grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 items-center p-4 gap-4">
+    <div className=" w-full bg-gray-900 text-white h-screen animate-fadeIn">
+      <main className=" grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 items-center p-4 gap-4">
         {posts.map((item) => {
           return (
             <section

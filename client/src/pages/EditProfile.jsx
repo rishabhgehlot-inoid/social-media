@@ -63,7 +63,7 @@ const EditProfile = () => {
     });
   };
   return (
-    <div className=" w-full bg-gray-950 text-white min-h-screen">
+    <div className=" w-full bg-gray-800 text-white min-h-screen">
       <main className=" flex justify-start flex-col items-center p-4 gap-4">
         <div className=" container max-w-2xl flex flex-col gap-3 w-full">
           <input

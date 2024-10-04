@@ -1,7 +1,9 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const UserSideBar = () => {
+  const navigation = useNavigate();
   const [users, setUsers] = useState([]);
   const instance = axios.create({
     baseURL: "http://localhost:4010/",
@@ -25,7 +27,7 @@ const UserSideBar = () => {
   return (
     <div>
       <main
-        className={` md:w-[500px] w-full bg-black/45 text-white h-full overflow-y-scroll fixed right-0`}
+        className={` md:w-[500px] w-full bg-gray-950 text-white h-full overflow-y-scroll right-0`}
       >
         {users.length > 0 &&
           users.map((item) => {
@@ -47,7 +49,14 @@ const UserSideBar = () => {
                   </div>
                   <h1 className="  font-bold text-xl">{item.username}</h1>
                 </div>
-                <button className=" p-3 rounded-lg bg-gray-900">View Profile</button>
+                <button
+                  className=" p-3 rounded-lg bg-gray-900"
+                  onClick={() => {
+                    navigation(`/profile/${item.username}`);
+                  }}
+                >
+                  View Profile
+                </button>
               </div>
             );
           })}

@@ -30,7 +30,7 @@ const Search = () => {
   }, [searchQuery]);
 
   return (
-    <div className=" w-full bg-gray-950 text-white p-4 h-screen">
+    <div className=" w-full bg-gray-900 text-white p-4 h-screen animate-fadeIn">
       <input
         type="text"
         className=" p-3 rounded-2xl w-full bg-black outline-none"
@@ -38,7 +38,7 @@ const Search = () => {
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
       />
-      <main className=" grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 items-center p-4 gap-4">
+      <main className=" grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 items-center p-4 gap-4">
         {posts.map((item) => {
           return (
             <section
