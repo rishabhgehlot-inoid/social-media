@@ -12,7 +12,14 @@ const {
 } = require("../models/Auth");
 const bcrypt = require("bcryptjs");
 const { generateJWTToken } = require("../services/jwtService");
-const { CreatePost, getPosts, LikePostModel } = require("../models/Post");
+const {
+  CreatePost,
+  getPosts,
+  LikePostModel,
+  FetchCommentByPost,
+  AddComment,
+  getPostById,
+} = require("../models/Post");
 const jwt = require("jsonwebtoken");
 const fs = require("fs");
 let randomstring = require("randomstring");
@@ -54,6 +61,26 @@ module.exports.setLikePost = async (req, res) => {
   try {
     const result = await LikePostModel(postId);
     res.status(201).json({ result, message: "Liked post" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+module.exports.AddCommentByPostController = async (req, res) => {
+  const { postId, comment, userId } = req.body;
+  try {
+    const result = await AddComment(postId, comment, userId);
+    res.status(201).json({ result, message: "Commented Post" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+module.exports.getPostByIdController = async (req, res) => {
+  const postId = req.query.postId;
+  try {
+    const result = await getPostById(postId);
+    res.status(201).json({ result, message: "Fetched Post" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

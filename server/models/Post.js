@@ -37,3 +37,32 @@ module.exports.LikePostModel = async (postId) => {
   }
 };
 
+module.exports.FetchCommentByPost = async (postId) => {
+  try {
+    let query = `SELECT comments FROM posts WHERE postId = ?`;
+    return await db.runQuerySync(query, [postId]);
+  } catch (error) {
+    console.error("Error in LikePostModel:", error);
+    return { error: "Failed to like the post. Please try again later." };
+  }
+};
+
+module.exports.AddComment = async (postId, comment, userId) => {
+  try {
+    let query = `UPDATE posts SET comments = JSON_ARRAY_APPEND(comments, '$', JSON_OBJECT('userid', ?, 'comment', ?, 'postId', ?)) WHERE postId = ?`;
+    return await db.runQuerySync(query, [userId, comment, postId, postId]);
+  } catch (error) {
+    console.error("Error in Add Comment:", error);
+    return {
+      error: "Failed to Add Comment to the post. Please try again later.",
+    };
+  }
+};
+module.exports.getPostById = async (postId) => {
+  try {
+    let query = `SELECT * FROM posts INNER JOIN users ON posts.userId = users.userId WHERE postId = ?;`;
+    return await db.runQuerySync(query, [postId]);
+  } catch (error) {
+    return error;
+  }
+};

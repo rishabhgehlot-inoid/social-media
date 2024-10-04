@@ -1,7 +1,39 @@
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useState } from "react";
+import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { auth } from "../firebase";
 const SignUp = () => {
+  const provider = new GoogleAuthProvider();
+  const handleGoogleLogin = async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const googleUser = result.user;
+      const response = await instance.post("/RegisterUsingGoogle", {
+        username: googleUser.displayName.trim(),
+        email: googleUser.email,
+        password: googleUser.uid,
+        profile_img: googleUser.photoURL,
+      });
+      localStorage.setItem("token", response.data.token);
+      navigation("/");
+      setUser({
+        username: "",
+        phone_number: "",
+        password: "",
+      });
+    } catch (error) {
+      // Handle Errors here.
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      // The email of the user's account used.
+      const email = error.customData.email;
+      // The AuthCredential type that was used.
+      const credential = GoogleAuthProvider.credentialFromError(error);
+      console.log(errorCode, errorMessage, email, credential);
+    }
+  };
+
   const navigation = useNavigate();
   const [user, setUser] = useState({
     username: "",
@@ -68,6 +100,12 @@ const SignUp = () => {
           onClick={handleRegister}
         >
           Submit
+        </button>
+        <button
+          className=" p-3 rounded-2xl bg-orange-600 font-bold hover:scale-105 hover:bg-orange-800"
+          onClick={handleGoogleLogin}
+        >
+          Google
         </button>
         <Link to={"/login"} className=" text-center">
           Account is exist? Login Account

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Heart, Menu, MessageCircle, Share2, UserCircle } from "lucide-react";
+import { Heart, Menu, MessageCircle, Share2 } from "lucide-react";
 import { useState } from "react";
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -73,9 +73,12 @@ const Profile = () => {
                   className=" flex flex-col justify-between w-full  md:w-[500px] bg-black rounded-xl my-3"
                   key={item.userId}
                 >
-                  <div className=" flex justify-between p-3">
-                    <div className=" flex gap-2">
-                      <UserCircle color="white" />
+                  <div className=" flex justify-between p-3 items-center">
+                    <div className=" flex gap-2 items-center">
+                      <img
+                        src={`http://localhost:4010/${item.profile_img}`}
+                        className=" w-10 h-10 rounded-full"
+                      />
                       {item.username}
                     </div>
                     <Menu />

@@ -42,6 +42,14 @@ module.exports.UserIsExistOrNotForLogin = async (phone_number) => {
     return error;
   }
 };
+module.exports.UserIsExistOrNotForLoginUsingEmail = async (email) => {
+  try {
+    let query = `SELECT * FROM users WHERE users.email = ?`;
+    return await db.runQuerySync(query, [email]);
+  } catch (error) {
+    return error;
+  }
+};
 module.exports.UserLogin = async (phone_number, token) => {
   try {
     let query = `UPDATE users SET token = ? WHERE users.phone_number = ? `;
@@ -55,6 +63,37 @@ module.exports.FindUserByPhoneNumber = async (phone_number) => {
   try {
     let query = `SELECT * FROM users WHERE users.phone_number = ?`;
     return await db.runQuerySync(query, [phone_number]);
+  } catch (error) {
+    return error;
+  }
+};
+
+module.exports.RegisterUserUsingGoogle = async (
+  userId,
+  username,
+  email,
+  password,
+  token,
+  profile_img
+) => {
+  try {
+    let query = `INSERT INTO users (userId, username, email, password ,token,profile_img ) VALUES (?, ? , ? , ?, ?, ?)`;
+    return await db.runQuerySync(query, [
+      userId,
+      username,
+      email,
+      password,
+      token,
+      profile_img,
+    ]);
+  } catch (error) {
+    return error;
+  }
+};
+module.exports.UserLoginUsingGoogle = async (email, token) => {
+  try {
+    let query = `UPDATE users SET token = ? WHERE users.email = ? `;
+    return await db.runQuerySync(query, [token, email]);
   } catch (error) {
     return error;
   }
