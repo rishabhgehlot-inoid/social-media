@@ -13,6 +13,7 @@ const {
   AddCommentByPostController,
   getPostByIdController,
   UpdatePost,
+  deleteByPostId,
 } = require("../controllers/Post");
 const { upload } = require("../config/multerConfig");
 const { getPosts } = require("../models/Post");
@@ -51,5 +52,6 @@ router.post("/addComment", AddCommentByPostController);
 router.post("/addChat", AddChat);
 router.post("/fetchChats", fetchChats);
 router.get("/getPostById", getPostByIdController);
+router.delete("/deletePost/:id", deleteByPostId);
 
 module.exports = router;

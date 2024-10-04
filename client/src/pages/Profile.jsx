@@ -62,16 +62,22 @@ const Profile = () => {
     <div className=" w-full bg-gray-900 text-white h-screen pb-40 animate-fadeIn">
       <aside
         className={`flex w-full h-auto bg-gray-800   ${
-          isScrolling ? " p-2 duration-300 gap-5" : "md:p-16 duration-300 p-8 gap-10"
+          isScrolling
+            ? " p-2 duration-300 gap-5"
+            : "md:p-16 duration-300 p-8 gap-10"
         }`}
       >
         <div className="">
           {posts.length > 0 && posts[0].profile_img ? (
             <img
-              src={`http://localhost:4010/${posts[0].profile_img}`}
-              className={` w-20 h-20 rounded-full ${
+              src={
+                posts[0].profile_img.includes("googleusercontent")
+                  ? posts[0].profile_img // Google profile image URL
+                  : `http://localhost:4010/${posts[0].profile_img}` // Local image URL
+              }
+              className={`w-20 h-20 rounded-full ${
                 isScrolling
-                  ? "md:w-20 md:h-20  duration-300"
+                  ? "md:w-20 md:h-20 duration-300"
                   : "md:w-40 md:h-40 duration-300"
               }`}
             />
@@ -106,13 +112,14 @@ const Profile = () => {
         className=" flex flex-col items-center h-full p-4 gap-4 overflow-y-scroll "
         ref={mainRef}
       >
-        {posts.length > 0 &&
-          posts.map((item) => {
-            return <Post post={item} key={posts.postId} />;
-          })}
+        {posts.map((item) => {
+          return <Post post={item} key={posts.postId} />;
+        })}
       </main>
     </div>
   );
 };
 
 export default Profile;
+// eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0aW1lIjoiRnJpIE9jdCAwNCAyMDI0IDE5OjE2OjE1IEdNVCswNTMwIChJbmRpYSBTdGFuZGFyZCBUaW1lKSIsInBob25lX251bWJlciI6Iis5MTczMDAwNTQyODUiLCJpYXQiOjE3MjgwNDk1NzV9.izvQ8JevVCZgWjBtzHK3XgekGq1KDwd1f7CL4oyTdAQ
+// eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0aW1lIjoiRnJpIE9jdCAwNCAyMDI0IDE5OjE2OjE1IEdNVCswNTMwIChJbmR

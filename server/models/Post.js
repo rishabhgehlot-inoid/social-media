@@ -83,3 +83,13 @@ module.exports.UpdatePost = async (userId, caption, post, postId) => {
     return error;
   }
 };
+
+module.exports.deletePost = async (postId) => {
+  try {
+    let query = `DELETE FROM posts WHERE postId = ?`;
+
+    return await db.runQuerySync(query, [postId]);
+  } catch (error) {
+    return error;
+  }
+};

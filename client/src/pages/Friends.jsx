@@ -37,7 +37,11 @@ const Friends = () => {
               <div className=" w-24 h-24 rounded-full bg-white">
                 {item.profile_img ? (
                   <img
-                    src={`http://localhost:4010/${item.profile_img}`}
+                    src={
+                      item.profile_img.includes("googleusercontent")
+                        ? item.profile_img // Google profile image URL
+                        : `http://localhost:4010/${item.profile_img}` // Local image URL
+                    }
                     className=" w-24 h-24 rounded-full"
                   />
                 ) : (

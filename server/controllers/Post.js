@@ -20,6 +20,7 @@ const {
   AddComment,
   getPostById,
   UpdatePost,
+  deletePost,
 } = require("../models/Post");
 const jwt = require("jsonwebtoken");
 const fs = require("fs");
@@ -107,6 +108,15 @@ module.exports.UpdatePost = async (req, res) => {
   try {
     await UpdatePost(userId, caption, path, postId);
     res.status(201).json({ message: "Post created successfully!" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+module.exports.deleteByPostId = async (req, res) => {
+  const postId = req.params.id;
+  try {
+    const posts = await deletePost(postId);
+    res.status(201).json(posts);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
