@@ -178,7 +178,7 @@ module.exports.LoginControllerUsingGoogle = async (req, res) => {
   try {
     const passwordMatch = await bcrypt.compare(password, resultPassword);
     if (passwordMatch) {
-      token = generateJWTToken({ phone_number });
+      token = generateJWTToken({ phone_number, email });
       const result = UserLogin(phone_number, token);
       console.log(result);
       res

@@ -18,10 +18,10 @@ module.exports.getPosts = async () => {
   }
 };
 
-module.exports.getUserWithPosts = async (phone_number) => {
+module.exports.getUserWithPosts = async (phone_number, email) => {
   try {
-    let query = `SELECT * FROM users LEFT JOIN posts ON posts.userId = users.userId WHERE phone_number = ?;`;
-    return await db.runQuerySync(query, [phone_number]);
+    let query = `SELECT * FROM users LEFT JOIN posts ON posts.userId = users.userId WHERE phone_number = ? OR email = ?;`;
+    return await db.runQuerySync(query, [phone_number, email]);
   } catch (error) {
     return error;
   }
@@ -62,6 +62,23 @@ module.exports.getPostById = async (postId) => {
   try {
     let query = `SELECT * FROM posts INNER JOIN users ON posts.userId = users.userId WHERE postId = ?;`;
     return await db.runQuerySync(query, [postId]);
+  } catch (error) {
+    return error;
+  }
+};
+module.exports.UpdatePost = async (userId, caption, post, postId) => {
+  try {
+    let query = `UPDATE posts SET caption = ? , post = ? WHERE  userId = ? AND postId = ?`;
+    if (post) {
+      query = `UPDATE posts SET post = ? WHERE  userId = ? AND postId = ?`;
+    }
+    if (caption) {
+      query = `UPDATE posts SET caption = ? WHERE  userId = ? AND postId = ?`;
+    }
+    if (post && caption) {
+      query = `UPDATE posts SET caption = ? , post = ? WHERE  userId = ? AND postId = ?`;
+    }
+    return await db.runQuerySync(query, [caption, post, userId, postId]);
   } catch (error) {
     return error;
   }

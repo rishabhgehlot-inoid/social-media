@@ -1,9 +1,9 @@
 import axios from "axios";
-import { Heart, Menu, MessageCircle, Share2 } from "lucide-react";
+
 import { useState } from "react";
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-
+import Post from "../components/Post";
 const Profile = () => {
   const { username } = useParams();
   const [posts, setPosts] = useState([]);
@@ -67,36 +67,7 @@ const Profile = () => {
       <main className=" flex justify-center items-center p-4 gap-4 flex-wrap p-4">
         {posts.length > 0 &&
           posts.map((item) => {
-            return (
-              item.post && (
-                <section
-                  className=" flex flex-col justify-between w-full  md:w-[500px] bg-black rounded-xl my-3"
-                  key={item.userId}
-                >
-                  <div className=" flex justify-between p-3 items-center">
-                    <div className=" flex gap-2 items-center">
-                      <img
-                        src={`http://localhost:4010/${item.profile_img}`}
-                        className=" w-10 h-10 rounded-full"
-                      />
-                      {item.username}
-                    </div>
-                    <Menu />
-                  </div>
-                  <img
-                    src={`http://localhost:4010/${item.post}`}
-                    alt={item.post}
-                    className="  aspect-square "
-                  />
-                  <caption className=" text-left p-3">{item.caption}</caption>
-                  <div className=" flex gap-3 p-3">
-                    <Heart />
-                    <MessageCircle />
-                    <Share2 />
-                  </div>
-                </section>
-              )
-            );
+            return <Post post={item} key={posts.postId} />;
           })}
       </main>
     </div>

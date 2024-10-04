@@ -10,6 +10,9 @@ import Profile from "./pages/Profile";
 import Search from "./pages/Search";
 import Chat from "./pages/Chat";
 import EditProfile from "./pages/EditProfile";
+import EditPost from "./pages/EditPost";
+import SideBar from "./components/SideBar";
+import UserSideBar from "./components/UserSideBar";
 // eslint-disable-next-line react/prop-types
 const Layout = ({ children }) => {
   return (
@@ -29,7 +32,11 @@ const App = () => {
             path="/"
             element={
               <Layout>
-                <Home />
+                <div className=" flex">
+                  <SideBar />
+                  <Home />
+                  <UserSideBar />
+                </div>
               </Layout>
             }
           />
@@ -86,6 +93,14 @@ const App = () => {
             element={
               <Layout>
                 <AddPost />
+              </Layout>
+            }
+          />
+          <Route
+            path="/EditPost/:id"
+            element={
+              <Layout>
+                <EditPost />
               </Layout>
             }
           />

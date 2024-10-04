@@ -80,7 +80,6 @@ const Post = ({ post }) => {
           <div onClick={() => setShowMenu(false)}>X</div>
         ) : (
           <>
-            {" "}
             <Menu onClick={() => setShowMenu(true)} />
           </>
         )}
@@ -90,8 +89,13 @@ const Post = ({ post }) => {
           showMenu ? " block" : " hidden"
         }`}
       >
-        <button className=" text-xl p-2">Edit</button>
-        <button className=" text-xl p-2">Update</button>
+        <button
+          className=" text-xl p-2"
+          onClick={() => navigation(`/EditPost/${post.postId}`)}
+        >
+          Edit
+        </button>
+        <button className=" text-xl p-2">Delete</button>
       </div>
       <img
         src={`http://localhost:4010/${post.post}`}

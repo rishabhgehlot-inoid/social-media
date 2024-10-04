@@ -12,7 +12,7 @@ import { useNavigate } from "react-router-dom";
 const Header = () => {
   const navigation = useNavigate();
   return (
-    <div className=" w-full bg-black p-5 h-18 sticky top-0">
+    <div className=" w-full bg-black p-5 h-18 sticky top-0 z-50">
       <main className=" flex justify-between items-center gap-5">
         <h1
           className=" text-2xl font-bold text-white cursor-pointer"

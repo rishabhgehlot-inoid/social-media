@@ -39,8 +39,9 @@ module.exports.getUserWithPosts = async (req, res) => {
   const token = req.headers["token"];
   const decodedToken = jwt.verify(token, process.env.SECRET_KEY);
   const phone_number = decodedToken.phone_number;
+  const email = decodedToken.email;
   try {
-    const result = await getUserWithPosts(phone_number);
+    const result = await getUserWithPosts(phone_number, email);
     res.status(201).json(result);
   } catch (error) {
     res.status(500).json({ error: error.message });

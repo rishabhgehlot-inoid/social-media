@@ -12,6 +12,7 @@ const {
   setLikePost,
   AddCommentByPostController,
   getPostByIdController,
+  UpdatePost,
 } = require("../controllers/Post");
 const { upload } = require("../config/multerConfig");
 const { getPosts } = require("../models/Post");
@@ -33,6 +34,7 @@ router.post("/LoginUser", LoginController);
 router.post("/LoginUsingGoogle", LoginControllerUsingGoogle);
 
 router.post("/createPost", upload.single("post"), CreatePost);
+router.post("/updatePost", upload.single("post"), UpdatePost);
 router.post(
   "/updateProfile",
   upload.single("profile_img"),

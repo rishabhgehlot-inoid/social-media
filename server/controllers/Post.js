@@ -19,6 +19,7 @@ const {
   FetchCommentByPost,
   AddComment,
   getPostById,
+  UpdatePost,
 } = require("../models/Post");
 const jwt = require("jsonwebtoken");
 const fs = require("fs");
@@ -81,6 +82,31 @@ module.exports.getPostByIdController = async (req, res) => {
   try {
     const result = await getPostById(postId);
     res.status(201).json({ result, message: "Fetched Post" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+module.exports.UpdatePost = async (req, res) => {
+  const { caption, postId } = req.body;
+  let path;
+  const token = req.headers["token"];
+  console.log(req.file, "file------------------>");
+
+  const decodedToken = jwt.verify(token, process.env.SECRET_KEY);
+  const phone_number = decodedToken.phone_number;
+  const result = await FindUserByPhoneNumber(phone_number);
+  const userId = result[0].userId;
+
+  if (req.file) {
+    path = `${Date.now()}.png`;
+    fs.writeFile(`public/${path}`, req.file.buffer, (err) => {
+      if (err) throw err;
+    });
+  }
+
+  try {
+    await UpdatePost(userId, caption, path, postId);
+    res.status(201).json({ message: "Post created successfully!" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
