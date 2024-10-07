@@ -3,18 +3,23 @@ import { useEffect, useState } from "react";
 import { onValue, push, ref } from "firebase/database";
 import { database } from "../firebase";
 import { SquareArrowLeft } from "lucide-react";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 const Chat = () => {
   function createUniqueWord(word1, word2) {
     const sortedWords = [word1, word2].sort();
     const uniqueWord = sortedWords.join("-");
     return uniqueWord;
   }
+
   const instance = axios.create({
     baseURL: "http://localhost:4010/",
     headers: {
       token: localStorage.getItem("token"),
     },
   });
+
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [receiver, setReceiver] = useState(0);
@@ -22,25 +27,33 @@ const Chat = () => {
   const [users, setUsers] = useState([]);
 
   const handleNewMessage = async () => {
-    console.log({
-      message: newMessage,
-      sender: sender,
-      receiver: receiver,
-      seen: 0,
-    });
-    if (newMessage) {
-      writeUserData(sender, receiver, newMessage);
-    }
+    if (!validateNewMessage()) return; // Validate the new message
+
     try {
       await instance.post("/addChat", {
         message: newMessage,
         sender: sender,
         receiver: receiver,
       });
+      writeUserData(sender, receiver, newMessage);
       setNewMessage(""); // Reset newMessage after successful post
+      toast.success("Message sent successfully!");
     } catch (error) {
       console.log(error);
+      toast.error("Failed to send message.");
     }
+  };
+
+  const validateNewMessage = () => {
+    if (!newMessage.trim()) {
+      toast.error("Message cannot be empty!");
+      return false;
+    }
+    if (newMessage.length > 500) { // Set a max length for messages
+      toast.error("Message is too long! Max length is 500 characters.");
+      return false;
+    }
+    return true;
   };
 
   const handleUsers = async () => {
@@ -48,11 +61,12 @@ const Chat = () => {
       const response = await instance.get("/getAllUsers");
       console.log(response.data);
       setUsers(response.data);
-      // setReceiver(response.data[0].userId);
     } catch (error) {
       console.log(error);
+      // toast.error("Failed to fetch users.");
     }
   };
+
   const handleMe = async () => {
     try {
       const response = await instance.get("/getUser");
@@ -60,44 +74,31 @@ const Chat = () => {
       setSender(response.data[0].userId);
     } catch (error) {
       console.log(error);
+      // toast.error("Failed to fetch your details.");
     }
   };
-  // const handleFetchChats = async () => {
-  //   try {
-  //     const response = await instance.post("/fetchChats", {
-  //       sender: sender,
-  //       receiver: receiver,
-  //     });
-  //     setMessages(response.data);
-  //     console.log(response.data, "-------------------------------chats");
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // };
+
   useEffect(() => {
     handleUsers();
     handleMe();
-    // handleFetchChats();
   }, []);
-  // useEffect(() => {
-  //   handleFetchChats();
-  // }, [sender, receiver, newMessage, users]);
 
   useEffect(() => {
     const starCountRef = ref(database, "chats/");
     const unsubscribe = onValue(starCountRef, (snapshot) => {
       const data = snapshot.val();
-      setMessages(
-        Object.keys(data)
-          .map((key) => data[key])
-          .filter(
-            (item) => item.threadId === createUniqueWord(sender, receiver)
-          )
-      );
-      console.log(messages, "------------------------------>message");
+      if (data) {
+        setMessages(
+          Object.keys(data)
+            .map((key) => data[key])
+            .filter(
+              (item) => item.threadId === createUniqueWord(sender, receiver)
+            )
+        );
+      }
     });
     return () => unsubscribe(); // Cleanup listener on unmount
-  }, [sender, receiver, users]); // Removed newMessage from dependency array
+  }, [sender, receiver]);
 
   function writeUserData(sender, receiver, message) {
     const messageData = {
@@ -110,78 +111,77 @@ const Chat = () => {
 
     const messageRef = ref(database, `chats/`);
 
-    push(messageRef, messageData);
+    push(messageRef, messageData).catch((error) => {
+      console.log(error);
+      toast.error("Failed to write message data.");
+    });
   }
 
   return (
-    <div className=" w-full h-[calc(100vh-80px)] bg-gray-950 text-white flex animate-fadeIn">
+    <div className="w-full h-[calc(100vh-80px)] bg-gray-950 text-white flex animate-fadeIn">
       <main
-        className={` md:w-[500px] w-full bg-gray-900 h-full overflow-y-scroll ${
+        className={`md:w-[500px] w-full bg-gray-900 h-full overflow-y-scroll ${
           receiver ? " hidden md:block" : "block md:block"
         }`}
       >
         {users.length > 0 &&
-          users.map((item) => {
-            return (
-              <div
-                className={`w-full shadow-2xl flex gap-3 items-center p-4 ${
-                  receiver === item.userId ? " bg-gray-600" : ""
-                }`}
-                key={item.userId}
-                onClick={() => setReceiver(item.userId)}
-              >
-                <div className=" w-20 h-20 bg-white rounded-full">
-                  {item.profile_img ? (
-                    <img
-                      src={
-                        item.profile_img.includes("googleusercontent")
-                          ? item.profile_img // Google profile image URL
-                          : `http://localhost:4010/${item.profile_img}` // Local image URL
-                      }
-                      className=" w-20 h-20 rounded-full"
-                    />
-                  ) : (
-                    ""
-                  )}
-                </div>
-                <h1 className="  font-bold text-xl">{item.username}</h1>
+          users.map((item) => (
+            <div
+              className={`w-full shadow-2xl flex gap-3 items-center p-4 ${
+                receiver === item.userId ? " bg-gray-600" : ""
+              }`}
+              key={item.userId}
+              onClick={() => setReceiver(item.userId)}
+            >
+              <div className="w-20 h-20 bg-white rounded-full">
+                {item.profile_img ? (
+                  <img
+                    src={
+                      item.profile_img.includes("googleusercontent")
+                        ? item.profile_img // Google profile image URL
+                        : `http://localhost:4010/${item.profile_img}` // Local image URL
+                    }
+                    className="w-20 h-20 rounded-full"
+                  />
+                ) : (
+                  ""
+                )}
               </div>
-            );
-          })}
+              <h1 className="font-bold text-xl">{item.username}</h1>
+            </div>
+          ))}
       </main>
       <main
-        className={` flex flex-col justify-between w-full p-4 ${
+        className={`flex flex-col justify-between w-full p-4 ${
           receiver ? "block md:block" : "hidden md:block"
         }`}
       >
-        <section className=" w-full h-[90%] md:h-[95%] overflow-y-scroll">
+        <section className="w-full h-[90%] md:h-[95%] overflow-y-scroll">
           <SquareArrowLeft
             onClick={() => {
               setReceiver(0);
             }}
-            className=" md:hidden fixed"
+            className="md:hidden fixed"
           />
           {messages.length > 0 &&
-            messages.map((item, index) => {
-              return (
-                <div
-                  className={`py-2 flex ${
-                    sender === item.sender ? "justify-end" : " justify-start"
-                  }`}
-                  key={index}
-                >
-                  <span className=" bg-black p-2 rounded-md">
-                    {item.message}
-                  </span>
-                </div>
-              );
-            })}
+            messages.map((item, index) => (
+              <div
+                className={`py-2 flex ${
+                  sender === item.sender ? "justify-end" : "justify-start"
+                }`}
+                key={index}
+              >
+                <span className="bg-black p-2 rounded-md">
+                  {item.message}
+                </span>
+              </div>
+            ))}
         </section>
-        {receiver ? (
-          <div className=" flex gap-2">
+        {receiver && (
+          <div className="flex gap-2">
             <input
               type="text"
-              className=" w-full p-3 bg-black rounded-2xl "
+              className="w-full p-3 bg-black rounded-2xl"
               placeholder="Message..."
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
@@ -196,10 +196,9 @@ const Chat = () => {
               Send
             </button>
           </div>
-        ) : (
-          ""
         )}
       </main>
+      <ToastContainer />
     </div>
   );
 };

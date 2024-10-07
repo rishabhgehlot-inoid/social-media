@@ -1,4 +1,5 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+/* eslint-disable no-undef */
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import Footer from "./components/Footer";
 import Header from "./components/Header";
 import Home from "./pages/Home";
@@ -13,103 +14,78 @@ import EditProfile from "./pages/EditProfile";
 import EditPost from "./pages/EditPost";
 import SideBar from "./components/SideBar";
 import UserSideBar from "./components/UserSideBar";
+import MobileNav from "./components/MobileNav";
+
 // eslint-disable-next-line react/prop-types
 const Layout = ({ children }) => {
-  return (
-    <main className=" h-screen fixed w-screen bg-gray-900">
+  return localStorage.getItem("token") ? (
+    <main className="h-screen fixed w-screen bg-gray-900">
       <Header />
-      <div className=" flex">
+      <div className="flex">
         <SideBar />
         {children}
         <UserSideBar />
       </div>
+      <MobileNav />
       <Footer />
     </main>
+  ) : (
+    <Navigate to="/login" replace={true} />
   );
 };
+const handleAuthRedirect = (component) => {
+  return localStorage.getItem("token") ? (
+    <Navigate to="/" replace={true} />
+  ) : (
+    component
+  );
+};
+const handleChatRedirect = (component) => {
+  return !localStorage.getItem("token") ? (
+    <Navigate to="/login" replace={true} />
+  ) : (
+    component
+  );
+};
+
 const App = () => {
+  const protectedRoutes = [
+    { path: "/", element: <Home /> },
+    { path: "/friends", element: <Friends /> },
+    { path: "/profile", element: <Profile /> },
+    { path: "/profile/:username", element: <Profile /> },
+    { path: "/editProfile/:userId", element: <EditProfile /> },
+    { path: "/search", element: <Search /> },
+    { path: "/add-post", element: <AddPost /> },
+    { path: "/EditPost/:id", element: <EditPost /> },
+  ];
+
   return (
     <div>
       <BrowserRouter>
         <Routes>
-          <Route
-            path="/"
-            element={
-              <Layout>
-                <Home />
-              </Layout>
-            }
-          />
-          <Route
-            path="/friends"
-            element={
-              <Layout>
-                <Friends />
-              </Layout>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <Layout>
-                <Profile />
-              </Layout>
-            }
-          />
-          <Route
-            path="/profile/:username"
-            element={
-              <Layout>
-                <Profile />
-              </Layout>
-            }
-          />
-          <Route
-            path="/editProfile/:userId"
-            element={
-              <Layout>
-                <EditProfile />
-              </Layout>
-            }
-          />
-          <Route
-            path="/search"
-            element={
-              <Layout>
-                <Search />
-              </Layout>
-            }
-          />
-          <Route
-            path="/chat"
-            element={
-              <div className="bg-gray-900">
-                <Header />
-                <Chat />
-                <Footer />
-              </div>
-            }
-          />
-          <Route
-            path="/add-post"
-            element={
-              <Layout>
-                <AddPost />
-              </Layout>
-            }
-          />
-          <Route
-            path="/EditPost/:id"
-            element={
-              <Layout>
-                <EditPost />
-              </Layout>
-            }
-          />
-          <Route path="/register" element={<SignUp />} />
-          <Route path="/login" element={<Login />} />
+          {protectedRoutes.map((route) => (
+            <Route
+              key={route.path}
+              path={route.path}
+              element={<Layout>{route.element}</Layout>}
+            />
+          ))}
+          <Route path="/chat" element={handleChatRedirect(<ChatLayout />)} />
+          <Route path="/register" element={handleAuthRedirect(<SignUp />)} />
+          <Route path="/login" element={handleAuthRedirect(<Login />)} />
         </Routes>
       </BrowserRouter>
+    </div>
+  );
+};
+
+const ChatLayout = () => {
+  return (
+    <div className="bg-gray-900">
+      <Header />
+      <Chat />
+      <MobileNav />
     </div>
   );
 };

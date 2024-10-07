@@ -25,7 +25,7 @@ const UserSideBar = () => {
     handleUsers();
   }, []);
   return (
-    <div>
+    <div className=" hidden md:block">
       <main
         className={` md:w-[500px] w-full bg-gray-950 text-white h-full overflow-y-scroll right-0`}
       >
@@ -42,8 +42,8 @@ const UserSideBar = () => {
                       <img
                         src={
                           item.profile_img.includes("googleusercontent")
-                            ? item.profile_img // Google profile image URL
-                            : `http://localhost:4010/${item.profile_img}` // Local image URL
+                            ? item.profile_img 
+                            : `http://localhost:4010/${item.profile_img}` 
                         }
                         className=" w-20 h-20 rounded-full"
                       />

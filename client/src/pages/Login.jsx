@@ -3,13 +3,16 @@ import axios from "axios";
 import { useState } from "react";
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { auth } from "../firebase";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 const Login = () => {
   const navigation = useNavigate();
   const [user, setUser] = useState({
-    username: "",
     phone_number: "",
     password: "",
   });
+  
   const instance = axios.create({
     baseURL: "http://localhost:4010/",
     timeout: 1000,
@@ -17,6 +20,7 @@ const Login = () => {
   });
 
   const provider = new GoogleAuthProvider();
+
   const handleGoogleLogin = async () => {
     try {
       const result = await signInWithPopup(auth, provider);
@@ -27,22 +31,25 @@ const Login = () => {
       });
       localStorage.setItem("token", response.data.token);
       navigation("/");
-      setUser({
-        username: "",
-        phone_number: "",
-        password: "",
-      });
+      toast.success("Logged in successfully with Google!");
     } catch (error) {
-      // Handle Errors here.
-      const errorCode = error.code;
-      const errorMessage = error.message;
-
-      // The AuthCredential type that was used.
-      const credential = GoogleAuthProvider.credentialFromError(error);
-      console.log(errorCode, errorMessage, credential);
+      const errorMessage = error.message || "Google login failed!";
+      toast.error(errorMessage);
+      console.error(error);
     }
   };
+
+  const validateInputs = () => {
+    if (!user.phone_number || !user.password) {
+      toast.error("Phone number and password are required!");
+      return false;
+    }
+    return true;
+  };
+
   const handleRegister = async () => {
+    if (!validateInputs()) return;
+
     try {
       const result = await instance.post("/LoginUser", user);
       console.log(result.data);
@@ -52,10 +59,14 @@ const Login = () => {
         password: "",
       });
       navigation("/");
+      toast.success("Logged in successfully!");
     } catch (error) {
-      console.log(error);
+      const errorMessage = error.response?.data?.error || "Login failed!";
+      toast.error(errorMessage);
+      console.error(error);
     }
   };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setUser({
@@ -63,42 +74,44 @@ const Login = () => {
       [name]: value, // Update the specific input field
     });
   };
+
   return (
-    <div className=" text-white flex justify-center items-center w-screen h-screen bg-gray-950">
-      <main className=" flex flex-col gap-3 bg-black p-5 rounded-2xl min-w-[500px]">
-        <h1 className=" text-5xl font-bold text-center py-9">Login</h1>
+    <div className="text-white flex justify-center items-center w-screen h-screen bg-gray-950">
+      <main className="flex flex-col gap-3 bg-black p-5 rounded-2xl min-w-[500px]">
+        <h1 className="text-5xl font-bold text-center py-9">Login</h1>
         <input
           type="text"
           name="phone_number"
-          className=" p-3 rounded-2xl bg-gray-950 outline-none hover:scale-105"
+          className="p-3 rounded-2xl bg-gray-950 outline-none hover:scale-105"
           placeholder="Phone Number..."
           value={user.phone_number}
           onChange={handleInputChange}
         />
         <input
-          type="text"
-          className=" p-3 rounded-2xl bg-gray-950 outline-none hover:scale-105"
+          type="password"
+          className="p-3 rounded-2xl bg-gray-950 outline-none hover:scale-105"
           placeholder="Password..."
           onChange={handleInputChange}
           name="password"
           value={user.password}
         />
         <button
-          className=" p-3 rounded-2xl bg-orange-600 font-bold hover:scale-105 hover:bg-orange-800"
+          className="p-3 rounded-2xl bg-orange-600 font-bold hover:scale-105 hover:bg-orange-800"
           onClick={handleRegister}
         >
           Submit
         </button>
         <button
-          className=" p-3 rounded-2xl bg-orange-600 font-bold hover:scale-105 hover:bg-orange-800"
+          className="p-3 rounded-2xl bg-orange-600 font-bold hover:scale-105 hover:bg-orange-800"
           onClick={handleGoogleLogin}
         >
           Google
         </button>
-        <Link to={"/register"} className=" text-center">
-          Account is exist? Login Account
+        <Link to={"/register"} className="text-center">
+          Don&apos;t have an account? Register
         </Link>
       </main>
+      <ToastContainer />
     </div>
   );
 };

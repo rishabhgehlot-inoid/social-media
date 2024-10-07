@@ -11,7 +11,7 @@ import { NavLink } from "react-router-dom";
 
 const SideBar = () => {
   return (
-    <div className=" w-[500px] bg-gray-950 h-screen p-5 flex flex-col justify-between pb-20">
+    <div className=" w-[500px] bg-gray-950 h-screen p-5 flex flex-col justify-between pb-20 hidden md:block">
       <ul className=" w-full">
         <NavLink
           to={"/"}
@@ -80,6 +80,7 @@ const SideBar = () => {
         </NavLink>
       </ul>
       <NavLink
+        onClick={() => localStorage.setItem("token", "")}
         to={"/login"}
         className={({ isActive, isPending }) =>
           `text-xl font-bold text-white shadow-sm p-5 flex gap-4 rounded-lg ${

@@ -1,12 +1,4 @@
-import {
-  Home,
-  LogOut,
-  MessageCircleMore,
-  PlusSquare,
-  Search,
-  User,
-  Users,
-} from "lucide-react";
+import { LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const Header = () => {
@@ -23,45 +15,10 @@ const Header = () => {
           Socials
         </h1>
         <ul className=" pt-1 flex gap-3 font-bold text-white items-center">
-          <Home
-            className=" hover:text-orange-600"
-            onClick={() => {
-              navigation("/");
-            }}
-          />
-          <Users
-            className=" hover:text-orange-600"
-            onClick={() => {
-              navigation("/friends");
-            }}
-          />
-          <User
-            className=" hover:text-orange-600"
-            onClick={() => {
-              navigation("/profile");
-            }}
-          />
-          <Search
-            className=" hover:text-orange-600"
-            onClick={() => {
-              navigation("/search");
-            }}
-          />
-          <PlusSquare
-            className=" hover:text-orange-600"
-            onClick={() => {
-              navigation("/add-post");
-            }}
-          />
-          <MessageCircleMore
-            className=" hover:text-orange-600"
-            onClick={() => {
-              navigation("/chat");
-            }}
-          />
           <LogOut
             onClick={() => {
               navigation("/login");
+              localStorage.setItem("token", "");
             }}
             className=" hover:text-orange-600"
           />

@@ -23,6 +23,7 @@ const {
   getUserWithPosts,
   getUserByUsername,
   UpdateUserProfileController,
+  AddStories,
 } = require("../controllers/User");
 const { getAllUsers } = require("../models/User");
 const { AddChat, fetchChats } = require("../controllers/Chat");
@@ -40,6 +41,11 @@ router.post(
   "/updateProfile",
   upload.single("profile_img"),
   UpdateUserProfileController
+);
+router.post(
+  "/addStory",
+  upload.single("story"),
+  AddStories
 );
 router.get("/posts", getPostsController);
 router.get("/getUser", getUser);

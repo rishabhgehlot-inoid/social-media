@@ -7,6 +7,8 @@ import Post from "../components/Post";
 const Profile = () => {
   const { username } = useParams();
   const [posts, setPosts] = useState([]);
+  const [story, setStory] = useState(null);
+  const [addStory, setAddStory] = useState(false);
   const instance = axios.create({
     baseURL: "http://localhost:4010/",
     headers: {
@@ -35,6 +37,22 @@ const Profile = () => {
   useEffect(() => {
     handlePost();
   }, [username]);
+  const config = {
+    headers: {
+      "content-type": "multipart/form-data",
+    },
+  };
+  const handleStroy = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("story", story);
+      const response = await instance.post("/addStory", formData, config);
+      console.log(response.data);
+      setAddStory(false);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -60,6 +78,21 @@ const Profile = () => {
   const navigation = useNavigate();
   return (
     <div className=" w-full bg-gray-900 text-white h-screen pb-40 animate-fadeIn">
+      {addStory && (
+        <div className=" absolute bg-black left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] flex flex-col items-center gap-4 p-5 rounded-xl">
+          <input
+            type="file"
+            className=" p-2 bg-gray-800 rounded-lg w-full"
+            onChange={(e) => setStory(e.target.files[0])}
+          />
+          <button
+            className=" p-2 bg-blue-800 rounded-lg w-full"
+            onClick={handleStroy}
+          >
+            Submit
+          </button>
+        </div>
+      )}
       <aside
         className={`flex w-full h-auto bg-gray-800   ${
           isScrolling
@@ -67,7 +100,7 @@ const Profile = () => {
             : "md:p-16 duration-300 p-8 gap-10"
         }`}
       >
-        <div className="">
+        <div className="" onClick={() => setAddStory(true)}>
           {posts.length > 0 && posts[0].profile_img ? (
             <img
               src={
@@ -75,10 +108,10 @@ const Profile = () => {
                   ? posts[0].profile_img // Google profile image URL
                   : `http://localhost:4010/${posts[0].profile_img}` // Local image URL
               }
-              className={`w-20 h-20 rounded-full ${
+              className={` rounded-full ${
                 isScrolling
-                  ? "md:w-20 md:h-20 duration-300"
-                  : "md:w-40 md:h-40 duration-300"
+                  ? "md:w-20 md:h-20 duration-300 w-10 h-10"
+                  : "md:w-40 md:h-40 duration-300 w-20 h-20"
               }`}
             />
           ) : (
@@ -94,11 +127,11 @@ const Profile = () => {
         >
           <h2 className=" text-xl">{posts.length > 0 && posts[0].username}</h2>
           <div className=" flex w-full gap-4">
-            <button className=" md:px-4 md:py-2 bg-gray-950 rounded-xl w-full">
+            <button className="px-4 py-2 bg-gray-950 rounded-xl w-full">
               View
             </button>
             <button
-              className=" md:px-4 md:py-2 bg-gray-950 rounded-xl w-full"
+              className=" px-4 py-2 bg-gray-950 rounded-xl w-full"
               onClick={() => {
                 navigation(`/editProfile/${posts[0].userId}`);
               }}

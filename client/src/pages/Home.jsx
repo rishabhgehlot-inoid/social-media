@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useEffect } from "react";
 
 import Post from "../components/Post";
+import StroyBlock from "../components/StroyBlock";
 const Home = () => {
   const [posts, setPosts] = useState([]);
   const instance = axios.create({
@@ -26,6 +27,7 @@ const Home = () => {
 
   return (
     <div className=" w-full bg-gray-900 text-white animate-fadeIn">
+      <StroyBlock />
       <main className=" flex justify-start flex-col items-center p-4 gap-4 overflow-y-scroll h-screen">
         {posts.length > 0 &&
           posts.map((item) => {
