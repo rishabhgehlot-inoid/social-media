@@ -19,9 +19,14 @@ const Post = ({ post }) => {
   const [likePost, setLikePost] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [comment, setComment] = useState("");
-  const [comments, setComments] = useState(JSON.parse(post.comments));
+  const [comments, setComments] = useState();
   const [showComments, setShowComments] = useState(false);
   const [likes, setLikes] = useState(0);
+  useEffect(() => {
+    if (post) {
+      setComments(post.comments);
+    }
+  }, [post]);
 
   const instance = axios.create({
     baseURL: "http://localhost:4010/",
@@ -81,7 +86,7 @@ const Post = ({ post }) => {
           >
             <img
               src={
-                post.profile_img.includes("googleusercontent")
+                post.profile_img?.includes("googleusercontent")
                   ? post.profile_img // Google profile image URL
                   : `http://localhost:4010/${post.profile_img}` // Local image URL
               }
@@ -148,10 +153,10 @@ const Post = ({ post }) => {
           </WhatsappShareButton>
         </div>
         {showComments ? (
-          <div className="flex flex-col gap-2 p-3">
+          <div className="flex flex-col gap-2 p-3 h-[100px] overflow-y-scroll">
             <h3 className=" font-bold">Comments</h3>
             {comments.map((item, index) => {
-              return (
+              return comments.length > 0 ? (
                 <div
                   className=""
                   key={index}
@@ -159,6 +164,8 @@ const Post = ({ post }) => {
                 >
                   {item.comment}
                 </div>
+              ) : (
+                <p>Comments are not found</p>
               );
             })}
           </div>

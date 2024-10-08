@@ -1,8 +1,8 @@
 import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const AddPost = () => {
   const config = {
@@ -54,7 +54,8 @@ const AddPost = () => {
       toast.success("Post created successfully!");
       navigation("/");
     } catch (error) {
-      const errorMessage = error.response?.data?.error || "Failed to create post!";
+      const errorMessage =
+        error.response?.data?.error || "Failed to create post!";
       toast.error(errorMessage);
       console.error(error);
     }
@@ -65,15 +66,28 @@ const AddPost = () => {
       <main className="flex flex-col gap-3 bg-black p-5 rounded-2xl md:min-w-[500px] items-center">
         <h1 className="text-5xl font-bold text-center py-9">Add Post</h1>
         {SelectedImage ? (
-          <img src={SelectedImage} alt="" className="md:w-[400px] rounded-2xl" />
-        ) : (
-          <input
-            type="file"
-            name="post"
-            className="p-3 rounded-2xl bg-gray-950 outline-none hover:scale-105"
-            placeholder="Image..."
-            onChange={updateImage}
+          <img
+            src={SelectedImage}
+            alt=""
+            className="md:h-[300px] rounded-2xl"
           />
+        ) : (
+          // <input
+          //   type="file"
+          //   name="post"
+          //   className="p-3 rounded-2xl bg-gray-950 outline-none hover:scale-105"
+          //   placeholder="Image..."
+          //   onChange={updateImage}
+          // />
+
+          <div className="parent">
+            <div className="file-upload">
+              {/* <img src={uploadImg} alt="upload" /> */}
+              <h3>Click box to upload</h3>
+              <p>Maximun file size 10mb</p>
+              <input type="file" name="post" onChange={updateImage} />
+            </div>
+          </div>
         )}
 
         <textarea
@@ -84,6 +98,15 @@ const AddPost = () => {
           value={caption}
           onChange={(e) => setCaption(e.target.value)}
         />
+        <button
+          className="p-3 rounded-2xl bg-orange-600 font-bold hover:scale-105 hover:bg-orange-800 w-full"
+          onClick={() => {
+            setImage("");
+            setSelectedImage(null);
+          }}
+        >
+          Remove Image
+        </button>
         <button
           className="p-3 rounded-2xl bg-orange-600 font-bold hover:scale-105 hover:bg-orange-800 w-full"
           onClick={handlePost}

@@ -98,3 +98,8 @@ module.exports.deletePost = async (postId) => {
     console.error("Database error: Could not delete post.");
   }
 };
+
+module.exports.paginationPosts = async (offset, limit) => {
+  let query = "SELECT * FROM posts INNER JOIN users ON posts.userId = users.userId LIMIT ? OFFSET ?";
+  return await db.runQuerySync(query, [limit, offset]);
+};

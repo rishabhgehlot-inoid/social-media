@@ -79,19 +79,21 @@ const Profile = () => {
   return (
     <div className=" w-full bg-gray-900 text-white h-screen pb-40 animate-fadeIn">
       {addStory && (
-        <div className=" absolute bg-black left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] flex flex-col items-center gap-4 p-5 rounded-xl">
-          <input
-            type="file"
-            className=" p-2 bg-gray-800 rounded-lg w-full"
-            onChange={(e) => setStory(e.target.files[0])}
-          />
-          <button
-            className=" p-2 bg-blue-800 rounded-lg w-full"
-            onClick={handleStroy}
-          >
-            Submit
-          </button>
-        </div>
+        <main className=" w-full h-full bg-black/80 z-[100] absolute left-0 top-0">
+          <div className=" absolute bg-black left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] flex flex-col items-center gap-4 p-5 rounded-xl z-[100]">
+            <input
+              type="file"
+              className=" p-2 bg-gray-800 rounded-lg w-full"
+              onChange={(e) => setStory(e.target.files[0])}
+            />
+            <button
+              className=" p-2 bg-blue-800 rounded-lg w-full"
+              onClick={handleStroy}
+            >
+              Submit
+            </button>
+          </div>
+        </main>
       )}
       <aside
         className={`flex w-full h-auto bg-gray-800   ${
@@ -130,14 +132,16 @@ const Profile = () => {
             <button className="px-4 py-2 bg-gray-950 rounded-xl w-full">
               View
             </button>
-            <button
-              className=" px-4 py-2 bg-gray-950 rounded-xl w-full"
-              onClick={() => {
-                navigation(`/editProfile/${posts[0].userId}`);
-              }}
-            >
-              Edit
-            </button>
+            {posts[0]?.token === localStorage.getItem("token") && (
+              <button
+                className=" px-4 py-2 bg-gray-950 rounded-xl w-full"
+                onClick={() => {
+                  navigation(`/editProfile/${posts[0].userId}`);
+                }}
+              >
+                Edit
+              </button>
+            )}
           </div>
         </div>
       </aside>

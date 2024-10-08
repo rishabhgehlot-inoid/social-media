@@ -2,7 +2,9 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const routes = require("./routes");
 require("dotenv").config();
+const cron = require("node-cron");
 const cors = require("cors");
+const { deleteOldStories } = require("./models/User");
 const app = express();
 app.use(express.static("public"));
 app.use(cors());
@@ -12,6 +14,14 @@ app.use(bodyParser.urlencoded({ extended: true, limit: "150mb" }));
 app.use(bodyParser.json());
 
 app.use(routes);
+
+cron.schedule("0 * * * *", async () => {
+  try {
+    await deleteOldStories();
+  } catch (error) {
+    console.error("Error deleting old stories:", error.message);
+  }
+});
 
 const port = process.env.PORT || 4010;
 

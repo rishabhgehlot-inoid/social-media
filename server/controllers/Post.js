@@ -16,8 +16,10 @@ const {
   getPostById,
   UpdatePost,
   deletePost,
+  paginationPosts,
 } = require("../models/Post");
 const { FindUserByPhoneNumber } = require("../models/Auth");
+const res = require("express/lib/response");
 
 // Validation schemas
 const postSchema = Joi.object({
@@ -200,5 +202,19 @@ module.exports.deleteByPostId = async (req, res) => {
   } catch (error) {
     console.error("Error deleting post:", error.message);
     res.status(SERVER_INTERNAL_ERROR).json({ error: "Failed to delete post." });
+  }
+};
+
+module.exports.paginationControllerForPosts = async (req, res) => {
+  const page = req.query.page || 1;
+  const limit = req.query.size || 5;
+  let offset = (page - 1) * limit;
+  try {
+    const response = await paginationPosts(offset, limit);
+    console.log(response);
+    res.status(200).json(response);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json(error);
   }
 };

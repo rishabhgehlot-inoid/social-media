@@ -14,6 +14,7 @@ const {
   getPostByIdController,
   UpdatePost,
   deleteByPostId,
+  paginationControllerForPosts,
 } = require("../controllers/Post");
 const { upload } = require("../config/multerConfig");
 const { getPosts } = require("../models/Post");
@@ -24,6 +25,7 @@ const {
   getUserByUsername,
   UpdateUserProfileController,
   AddStories,
+  addFollower,
 } = require("../controllers/User");
 const { getAllUsers } = require("../models/User");
 const { AddChat, fetchChats } = require("../controllers/Chat");
@@ -42,11 +44,7 @@ router.post(
   upload.single("profile_img"),
   UpdateUserProfileController
 );
-router.post(
-  "/addStory",
-  upload.single("story"),
-  AddStories
-);
+router.post("/addStory", upload.single("story"), AddStories);
 router.get("/posts", getPostsController);
 router.get("/getUser", getUser);
 router.get("/getUserWithPosts", getUserWithPosts);
@@ -56,8 +54,10 @@ router.post("/likePost", setLikePost);
 router.post("/addComment", AddCommentByPostController);
 
 router.post("/addChat", AddChat);
+router.post("/follow", addFollower);
 router.post("/fetchChats", fetchChats);
 router.get("/getPostById", getPostByIdController);
 router.delete("/deletePost/:id", deleteByPostId);
+router.get("/fetchPost", paginationControllerForPosts);
 
 module.exports = router;

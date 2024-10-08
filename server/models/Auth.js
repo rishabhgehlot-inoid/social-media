@@ -10,8 +10,14 @@ module.exports.CreateUserTable = async () => {
   }
 };
 
-module.exports.RegisterUser = async (userId, username, phone_number, password, token) => {
-  let query = `INSERT INTO users (userId, username, phone_number, password, token, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+module.exports.RegisterUser = async (
+  userId,
+  username,
+  phone_number,
+  password,
+  token
+) => {
+  let query = `INSERT INTO users (userId, username, phone_number, password, token, createdAt, updatedAt,stories) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
   try {
     return await db.runQuerySync(query, [
       userId,
@@ -21,6 +27,7 @@ module.exports.RegisterUser = async (userId, username, phone_number, password, t
       token,
       new Date(),
       new Date(),
+      JSON.stringify([]),
     ]);
   } catch (error) {
     console.error("Error registering user:", error.message);
@@ -53,8 +60,13 @@ module.exports.UserIsExistOrNotForLoginUsingEmail = async (email) => {
   try {
     return await db.runQuerySync(query, [email]);
   } catch (error) {
-    console.error("Error checking if user exists for login using email:", error.message);
-    console.error("Database error: Could not check if user exists for login using email.");
+    console.error(
+      "Error checking if user exists for login using email:",
+      error.message
+    );
+    console.error(
+      "Database error: Could not check if user exists for login using email."
+    );
   }
 };
 
@@ -78,8 +90,15 @@ module.exports.FindUserByPhoneNumber = async (phone_number) => {
   }
 };
 
-module.exports.RegisterUserUsingGoogle = async (userId, username, email, password, token, profile_img) => {
-  let query = `INSERT INTO users (userId, username, email, password, token, profile_img, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+module.exports.RegisterUserUsingGoogle = async (
+  userId,
+  username,
+  email,
+  password,
+  token,
+  profile_img
+) => {
+  let query = `INSERT INTO users (userId, username, email, password, token, profile_img, createdAt, updatedAt,stories) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
   try {
     return await db.runQuerySync(query, [
       userId,
@@ -90,6 +109,7 @@ module.exports.RegisterUserUsingGoogle = async (userId, username, email, passwor
       profile_img,
       new Date(),
       new Date(),
+      JSON.stringify([]),
     ]);
   } catch (error) {
     console.error("Error registering user using Google:", error.message);

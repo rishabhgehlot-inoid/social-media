@@ -73,10 +73,65 @@ module.exports.AddStory = async (storyId, story_img, userId, createAt) => {
           JSON_ARRAY(JSON_OBJECT('story_img', ?, 'storyId', ?, 'createAt', ?))
       ) 
       WHERE userId = ?`;
-    
-    return await db.runQuerySync(query, [story_img, storyId, createAt, story_img, storyId, createAt, userId]);
+
+    return await db.runQuerySync(query, [
+      story_img,
+      storyId,
+      createAt,
+      story_img,
+      storyId,
+      createAt,
+      userId,
+    ]);
   } catch (error) {
     console.error("Error adding stories:", error.message);
     console.error("Database error: Could not add stories.");
+  }
+};
+
+module.exports.deleteOldStories = async () => {
+  const twentyFourHoursAgo = Date.now() - 24 * 60 * 60 * 1000;
+
+  const query = `
+    UPDATE users 
+    SET stories = JSON_ARRAY_FILTER(stories, 
+      (story) -> JSON_UNQUOTE(JSON_EXTRACT(story, '$.createAt')) >= ?) 
+    WHERE userId IN (SELECT userId FROM users WHERE JSON_LENGTH(stories) > 0)`;
+
+  await db.runQuerySync(query, [twentyFourHoursAgo]);
+};
+
+module.exports.addFollower = async (followerId, userId, createAt) => {
+  try {
+    let query = `
+      UPDATE users 
+      SET following = COALESCE(
+          JSON_ARRAY_APPEND(following, '$', JSON_OBJECT('followerId', ?, 'createAt', ?)),
+          JSON_ARRAY(JSON_OBJECT('followerId', ?, 'createAt', ?))
+      ) 
+      WHERE userId = ?`;
+
+    return await db.runQuerySync(query, [
+      followerId,
+      createAt,
+      followerId,
+      createAt,
+      userId,
+    ]);
+  } catch (error) {
+    console.error("Error adding follower:", error.message);
+    console.error("Database error: Could not add follower.");
+  }
+};
+module.exports.checkFollowing = async (userId) => {
+  try {
+    let query = `
+      SELECT following FROM users
+      WHERE userId = ?`;
+
+    return await db.runQuerySync(query, [userId]);
+  } catch (error) {
+    console.error("Error adding follower:", error.message);
+    console.error("Database error: Could not add follower.");
   }
 };

@@ -13,6 +13,8 @@ const {
   getUserByUsername,
   UpdateUser,
   AddStory,
+  addFollower,
+  checkFollowing,
 } = require("../models/User");
 const { getUserWithPosts } = require("../models/Post");
 const randomstring = require("randomstring");
@@ -216,5 +218,46 @@ module.exports.AddStories = async (req, res) => {
     res
       .status(SERVER_INTERNAL_ERROR)
       .json({ error: "Failed to update profile." });
+  }
+};
+
+module.exports.addFollower = async (req, res) => {
+  const { followerId } = req.body;
+  const token = req.headers.token;
+
+  try {
+    // Verify and decode the JWT token
+    const decodedToken = jwt.verify(token, process.env.SECRET_KEY);
+    const userId = decodedToken.userId;
+
+    // Fetch the current following list
+    let following = await checkFollowing(userId);
+
+    // If 'following' is a string, parse it
+    if (following && following.length > 0) {
+      following = JSON.parse(following[0].following);
+    } else {
+      following = [];
+    }
+
+    // Check if the user is already following the followerId
+    const isAlreadyFollowing = following.some(
+      (follower) => follower.followerId === followerId
+    );
+
+    if (isAlreadyFollowing) {
+      return res
+        .status(400)
+        .json({ message: "User is already following this account." });
+    }
+
+    // Add the new follower
+    await addFollower(followerId, userId, Date.now());
+
+    // Send success response
+    res.status(201).json({ message: "Following updated successfully!" });
+  } catch (error) {
+    console.error("Error updating following:", error.message);
+    res.status(500).json({ error: "Failed to update following." });
   }
 };

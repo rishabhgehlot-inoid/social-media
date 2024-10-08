@@ -169,20 +169,20 @@ module.exports.LoginControllerUsingGoogle = async (req, res) => {
       return res.status(400).json({ error: "User does not exist." });
     }
 
-    const resultPassword = result[0].password;
+    // const resultPassword = result[0].password;
     const phone_number = result[0].phone_number;
     const userId = result[0].userId;
-    const passwordMatch = await bcrypt.compare(password, resultPassword);
+    // const passwordMatch = await bcrypt.compare(password, resultPassword);
 
-    if (passwordMatch) {
-      const token = generateJWTToken({ phone_number, email, userId: userId });
-      await UserLogin(phone_number, token);
-      res
-        .status(SERVER_CREATED_HTTP_CODE)
-        .json({ message: "Login successful", token });
-    } else {
-      res.status(400).json({ error: "Incorrect password." });
-    }
+    // if (passwordMatch) {
+    const token = generateJWTToken({ phone_number, email, userId: userId });
+    await UserLogin(phone_number, token);
+    res
+      .status(SERVER_CREATED_HTTP_CODE)
+      .json({ message: "Login successful", token });
+    // } else {
+    //   res.status(400).json({ error: "Incorrect password." });
+    // }
   } catch (error) {
     console.error("Error logging in with Google:", error.message);
     res.status(SERVER_BAD_REQUEST).json({ error: "Failed to log in." });
