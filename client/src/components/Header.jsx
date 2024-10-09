@@ -17,8 +17,8 @@ const Header = () => {
         <ul className=" pt-1 flex gap-3 font-bold text-white items-center">
           <LogOut
             onClick={() => {
-              navigation("/login");
               localStorage.setItem("token", "");
+              navigation("/login");
             }}
             className=" hover:text-orange-600"
           />

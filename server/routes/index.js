@@ -15,6 +15,7 @@ const {
   UpdatePost,
   deleteByPostId,
   paginationControllerForPosts,
+  addLike,
 } = require("../controllers/Post");
 const { upload } = require("../config/multerConfig");
 const { getPosts } = require("../models/Post");
@@ -50,14 +51,14 @@ router.get("/getUser", getUser);
 router.get("/getUserWithPosts", getUserWithPosts);
 router.get("/getAllUsers", getAllUsersController);
 router.get("/getUserByUsername", getUserByUsername);
-router.post("/likePost", setLikePost);
+router.post("/likePost", addLike);
 router.post("/addComment", AddCommentByPostController);
 
 router.post("/addChat", AddChat);
 router.post("/follow", addFollower);
 router.post("/fetchChats", fetchChats);
 router.get("/getPostById", getPostByIdController);
-router.delete("/deletePost/:id", deleteByPostId);
+router.delete("/deletePost/:postId", deleteByPostId);
 router.get("/fetchPost", paginationControllerForPosts);
 
 module.exports = router;

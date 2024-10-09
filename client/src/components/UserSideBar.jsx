@@ -32,36 +32,38 @@ const UserSideBar = () => {
         {users.length > 0 &&
           users.map((item) => {
             return (
-              <div
-                className={`w-full shadow-2xl flex gap-3 items-center justify-between p-4 `}
-                key={item.userId}
-              >
-                <div className=" flex gap-3 items-center">
-                  <div className=" w-20 h-20 bg-white rounded-full">
-                    {item.profile_img ? (
-                      <img
-                        src={
-                          item.profile_img.includes("googleusercontent")
-                            ? item.profile_img 
-                            : `http://localhost:4010/${item.profile_img}` 
-                        }
-                        className=" w-20 h-20 rounded-full"
-                      />
-                    ) : (
-                      ""
-                    )}
-                  </div>
-                  <h1 className="  font-bold text-xl">{item.username}</h1>
-                </div>
-                <button
-                  className=" p-3 rounded-lg bg-gray-900"
-                  onClick={() => {
-                    navigation(`/profile/${item.username}`);
-                  }}
+              item.token != localStorage.getItem("token") && (
+                <div
+                  className={`w-full shadow-2xl flex gap-3 items-center justify-between p-4 `}
+                  key={item.userId}
                 >
-                  View Profile
-                </button>
-              </div>
+                  <div className=" flex gap-3 items-center">
+                    <div className=" w-20 h-20 bg-white rounded-full">
+                      {item.profile_img ? (
+                        <img
+                          src={
+                            item.profile_img.includes("googleusercontent")
+                              ? item.profile_img
+                              : `http://localhost:4010/${item.profile_img}`
+                          }
+                          className=" w-20 h-20 rounded-full"
+                        />
+                      ) : (
+                        ""
+                      )}
+                    </div>
+                    <h1 className="  font-bold text-xl">{item.username}</h1>
+                  </div>
+                  <button
+                    className=" p-3 rounded-lg bg-gray-900"
+                    onClick={() => {
+                      navigation(`/profile/${item.username}`);
+                    }}
+                  >
+                    View Profile
+                  </button>
+                </div>
+              )
             );
           })}
       </main>

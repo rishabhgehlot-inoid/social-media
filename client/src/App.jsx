@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 /* eslint-disable no-undef */
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import Footer from "./components/Footer";
@@ -27,6 +28,18 @@ const Layout = ({ children }) => {
         <UserSideBar />
       </div>
       <MobileNav />
+    </main>
+  ) : (
+    <Navigate to="/login" replace={true} />
+  );
+};
+
+const ChatLayout = ({ children }) => {
+  return localStorage.getItem("token") ? (
+    <main className="h-screen fixed w-screen bg-gray-900">
+      <Header />
+      {children}
+      <MobileNav />
       <Footer />
     </main>
   ) : (
@@ -34,18 +47,7 @@ const Layout = ({ children }) => {
   );
 };
 const handleAuthRedirect = (component) => {
-  return localStorage.getItem("token") ? (
-    <Navigate to="/" replace={true} />
-  ) : (
-    component
-  );
-};
-const handleChatRedirect = (component) => {
-  return !localStorage.getItem("token") ? (
-    <Navigate to="/login" replace={true} />
-  ) : (
-    component
-  );
+  return localStorage.getItem("token") ? component : component;
 };
 
 const App = () => {
@@ -71,21 +73,18 @@ const App = () => {
               element={<Layout>{route.element}</Layout>}
             />
           ))}
-          <Route path="/chat" element={handleChatRedirect(<ChatLayout />)} />
+          <Route
+            path="/chat"
+            element={
+              <ChatLayout>
+                <Chat />
+              </ChatLayout>
+            }
+          />
           <Route path="/register" element={handleAuthRedirect(<SignUp />)} />
           <Route path="/login" element={handleAuthRedirect(<Login />)} />
         </Routes>
       </BrowserRouter>
-    </div>
-  );
-};
-
-const ChatLayout = () => {
-  return (
-    <div className="bg-gray-900">
-      <Header />
-      <Chat />
-      <MobileNav />
     </div>
   );
 };

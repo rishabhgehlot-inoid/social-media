@@ -26,7 +26,7 @@
   background: #e9f3fe;
 }
 .parent {
-  width: 450px;
+  width: 100%;
   margin: auto;
   padding: 2rem;
   background: black;
@@ -35,7 +35,7 @@
 }
 .file-upload {
   text-align: center;
-  border: 3px dashed #9A3411;
+  border: 3px dashed #9a3411;
   padding: 1.5rem;
   position: relative;
   cursor: pointer;

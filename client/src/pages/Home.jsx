@@ -37,10 +37,10 @@ const Home = () => {
     }
   };
   return (
-    <div className=" w-full bg-gray-900 text-white animate-fadeIn">
+    <div className=" w-full bg-gray-900 text-white animate-fadeIn overflow-y-scroll pb-40 h-screen">
       <StroyBlock />
       <main
-        className=" flex justify-start flex-col items-center p-4 gap-4 overflow-y-scroll h-screen pb-72"
+        className=" flex justify-start flex-col items-center p-4 gap-4"
         onScroll={handleScroll}
       >
         {posts.length > 0 ? (

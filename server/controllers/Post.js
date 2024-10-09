@@ -17,6 +17,8 @@ const {
   UpdatePost,
   deletePost,
   paginationPosts,
+  checkLike,
+  addLike,
 } = require("../models/Post");
 const { FindUserByPhoneNumber } = require("../models/Auth");
 const res = require("express/lib/response");
@@ -193,7 +195,7 @@ module.exports.deleteByPostId = async (req, res) => {
       .json({ error: error.details[0].message });
   }
 
-  const { postId } = req.params;
+  const postId = req.params.postId;
   try {
     const result = await deletePost(postId);
     res
@@ -216,5 +218,42 @@ module.exports.paginationControllerForPosts = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(400).json(error);
+  }
+};
+
+module.exports.addLike = async (req, res) => {
+  const token = req.headers.token;
+  const { postId } = req.body;
+  try {
+    // Verify and decode the JWT token
+    const decodedToken = jwt.verify(token, process.env.SECRET_KEY);
+    const userId = decodedToken.userId;
+
+    // Fetch the current following list
+    let likes = await checkLike(postId);
+    console.log("likes------------>", likes);
+
+    if (likes && likes.length > 0 && likes[0].likes != "") {
+      likes = JSON.parse(likes[0].likes);
+    } else {
+      likes = [];
+    }
+
+    // Check if the user is already following the userId
+    const isAlreadyLiked = likes.some((follower) => follower.userId === userId);
+
+    if (isAlreadyLiked) {
+      likes = JSON.stringify(likes.filter((like) => like.userId !== userId));
+      await addLike(likes, postId);
+      res.status(201).json({ message: "dislike updated successfully!" });
+    } else {
+      likes.push({ userId: userId, createAt: new Date() });
+      likes = JSON.stringify(likes);
+      await addLike(likes, postId);
+      res.status(201).json({ message: "like updated successfully!" });
+    }
+  } catch (error) {
+    console.error("Error updating like:", error.message);
+    res.status(500).json({ error: "Failed to update like." });
   }
 };

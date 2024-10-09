@@ -70,10 +70,10 @@ module.exports.UserIsExistOrNotForLoginUsingEmail = async (email) => {
   }
 };
 
-module.exports.UserLogin = async (phone_number, token) => {
-  let query = `UPDATE users SET token = ? WHERE users.phone_number = ?`;
+module.exports.UserLogin = async (email, token) => {
+  let query = `UPDATE users SET token = ? WHERE users.email = ?`;
   try {
-    return await db.runQuerySync(query, [token, phone_number]);
+    return await db.runQuerySync(query, [token, email]);
   } catch (error) {
     console.error("Error updating user token for login:", error.message);
     console.error("Database error: Could not update token for login.");

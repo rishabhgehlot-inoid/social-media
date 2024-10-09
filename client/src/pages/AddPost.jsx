@@ -1,4 +1,5 @@
 import axios from "axios";
+import { X } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
@@ -62,24 +63,27 @@ const AddPost = () => {
   };
 
   return (
-    <div className="text-white flex justify-center p-3 md:items-center w-screen min-h-screen bg-gray-900 animate-fadeIn">
+    <div className="text-white flex justify-center p-3 md:items-center w-screen md:min-h-screen bg-gray-900 animate-fadeIn">
       <main className="flex flex-col gap-3 bg-black p-5 rounded-2xl md:min-w-[500px] items-center">
-        <h1 className="text-5xl font-bold text-center py-9">Add Post</h1>
+        <h1 className=" text-3xl md:text-5xl font-bold text-center md:py-9">Add Post</h1>
         {SelectedImage ? (
-          <img
-            src={SelectedImage}
-            alt=""
-            className="md:h-[300px] rounded-2xl"
-          />
+          <div className=" relative">
+            <button
+              className="p-3 rounded-2xl bg-red-600 font-bold hover:scale-105 hover:bg-red-800 absolute right-0 top-0 w-fit"
+              onClick={() => {
+                setImage("");
+                setSelectedImage();
+              }}
+            >
+              <X />
+            </button>
+            <img
+              src={`${SelectedImage}`}
+              alt="Current Post"
+              className=" w-full md:w-[400px] rounded-2xl"
+            />
+          </div>
         ) : (
-          // <input
-          //   type="file"
-          //   name="post"
-          //   className="p-3 rounded-2xl bg-gray-950 outline-none hover:scale-105"
-          //   placeholder="Image..."
-          //   onChange={updateImage}
-          // />
-
           <div className="parent">
             <div className="file-upload">
               {/* <img src={uploadImg} alt="upload" /> */}
@@ -98,15 +102,6 @@ const AddPost = () => {
           value={caption}
           onChange={(e) => setCaption(e.target.value)}
         />
-        <button
-          className="p-3 rounded-2xl bg-orange-600 font-bold hover:scale-105 hover:bg-orange-800 w-full"
-          onClick={() => {
-            setImage("");
-            setSelectedImage(null);
-          }}
-        >
-          Remove Image
-        </button>
         <button
           className="p-3 rounded-2xl bg-orange-600 font-bold hover:scale-105 hover:bg-orange-800 w-full"
           onClick={handlePost}

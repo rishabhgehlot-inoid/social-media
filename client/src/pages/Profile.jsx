@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Post from "../components/Post";
+import { X } from "lucide-react";
 const Profile = () => {
   const { username } = useParams();
   const [posts, setPosts] = useState([]);
@@ -44,11 +45,13 @@ const Profile = () => {
   };
   const handleStroy = async () => {
     try {
-      const formData = new FormData();
-      formData.append("story", story);
-      const response = await instance.post("/addStory", formData, config);
-      console.log(response.data);
-      setAddStory(false);
+      if (story) {
+        const formData = new FormData();
+        formData.append("story", story);
+        const response = await instance.post("/addStory", formData, config);
+        console.log(response.data);
+        setAddStory(false);
+      }
     } catch (error) {
       console.log(error);
     }
@@ -77,28 +80,45 @@ const Profile = () => {
 
   const navigation = useNavigate();
   return (
-    <div className=" w-full bg-gray-900 text-white h-screen pb-40 animate-fadeIn">
+    <div className=" w-full bg-gray-900 text-white h-screen pb-48 animate-fadeIn">
       {addStory && (
         <main className=" w-full h-full bg-black/80 z-[100] absolute left-0 top-0">
-          <div className=" absolute bg-black left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] flex flex-col items-center gap-4 p-5 rounded-xl z-[100]">
-            <input
-              type="file"
-              className=" p-2 bg-gray-800 rounded-lg w-full"
-              onChange={(e) => setStory(e.target.files[0])}
+          <div className=" w-full md:w-fit absolute bg-black left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] flex flex-col items-center gap-4 p-5 rounded-xl z-[100] m-2">
+            <X
+              className=" absolute right-3 top-3"
+              onClick={() => {
+                setAddStory(false);
+                setStory();
+              }}
             />
+            {story ? (
+              <img src={URL.createObjectURL(story)} />
+            ) : (
+              <div className="parent">
+                <div className="file-upload">
+                  <h3>Click box to upload</h3>
+                  <p>Maximun file size 10mb</p>
+                  <input
+                    type="file"
+                    name="post"
+                    onChange={(e) => setStory(e.target.files[0])}
+                  />
+                </div>
+              </div>
+            )}
             <button
-              className=" p-2 bg-blue-800 rounded-lg w-full"
+              className=" p-2 bg-orange-600 rounded-lg w-full"
               onClick={handleStroy}
             >
-              Submit
+              Upload
             </button>
           </div>
         </main>
       )}
       <aside
-        className={`flex w-full h-auto bg-gray-800   ${
+        className={`flex items-center w-full h-auto bg-gray-800   ${
           isScrolling
-            ? " p-2 duration-300 gap-5"
+            ? " p-2 duration-300 gap-2"
             : "md:p-16 duration-300 p-8 gap-10"
         }`}
       >
@@ -146,7 +166,7 @@ const Profile = () => {
         </div>
       </aside>
       <main
-        className=" flex flex-col items-center h-full p-4 gap-4 overflow-y-scroll "
+        className=" flex flex-col items-center h-full p-4 gap-4 overflow-y-scroll pb-20"
         ref={mainRef}
       >
         {posts.map((item) => {

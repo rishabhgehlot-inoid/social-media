@@ -1,8 +1,10 @@
 import axios from "axios";
 import { useState } from "react";
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Search = () => {
+  const navigation = useNavigate();
   const [posts, setPosts] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const instance = axios.create({
@@ -28,7 +30,16 @@ const Search = () => {
       clearTimeout(timer);
     };
   }, [searchQuery]);
-
+  const handleFollow = async (followerId) => {
+    try {
+      const response = await instance.post("/follow", {
+        followerId,
+      });
+      console.log(response);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <div className=" w-full bg-gray-900 text-white p-4 h-screen animate-fadeIn">
       <input
@@ -69,7 +80,10 @@ const Search = () => {
                 >
                   View
                 </button>
-                <button className=" md:px-4 py-2 bg-gray-950 rounded-xl w-full">
+                <button
+                  className=" md:px-4 py-2 bg-gray-950 rounded-xl w-full"
+                  onClick={() => handleFollow(item?.userId)}
+                >
                   Follow
                 </button>
               </div>

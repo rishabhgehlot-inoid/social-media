@@ -40,30 +40,33 @@ const StroyBlock = () => {
         className={`w-full bg-gray-800 text-white flex justify-start overflow-x-scroll`}
       >
         {users.length > 0 &&
-          users.map((item, index) => (
-            <div
-              className={`md:p-4 p-2`}
-              key={item.userId}
-              onClick={() => handleStoryOpen(index)}
-            >
-              <div className="flex gap-3 items-center">
-                <div className=" rounded-full">
-                  {item.profile_img ? (
-                    <img
-                      src={
-                        item.profile_img.includes("googleusercontent")
-                          ? item.profile_img
-                          : `http://localhost:4010/${item.profile_img}`
-                      }
-                      className="md:w-20 md:h-20 w-16 h-16 rounded-full bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 p-1"
-                    />
-                  ) : (
-                    ""
-                  )}
+          users.map(
+            (item, index) =>
+              JSON.parse(item.stories).length > 0 && (
+                <div
+                  className={`md:p-4 p-2`}
+                  key={item.userId}
+                  onClick={() => handleStoryOpen(index)}
+                >
+                  <div className="flex gap-3 items-center">
+                    <div className=" rounded-full">
+                      {item.profile_img ? (
+                        <img
+                          src={
+                            item.profile_img.includes("googleusercontent")
+                              ? item.profile_img
+                              : `http://localhost:4010/${item.profile_img}`
+                          }
+                          className="md:w-20 md:h-20 w-16 h-16 rounded-full bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 p-1"
+                        />
+                      ) : (
+                        ""
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          ))}
+              )
+          )}
       </main>
 
       {activeUserIndex !== null && (
@@ -83,9 +86,7 @@ const StroyBlock = () => {
                 : [{ url: "" }]
             }
             defaultInterval={1500}
-            // width={432}
-            // height={768}
-            // onStoryEnd={handleStoryClose} // Close stories when they end
+            onAllStoriesEnd={handleStoryClose} // Close stories when they end
           />
         </div>
       )}

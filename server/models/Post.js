@@ -100,6 +100,28 @@ module.exports.deletePost = async (postId) => {
 };
 
 module.exports.paginationPosts = async (offset, limit) => {
-  let query = "SELECT * FROM posts INNER JOIN users ON posts.userId = users.userId LIMIT ? OFFSET ?";
+  let query =
+    "SELECT * FROM posts INNER JOIN users ON posts.userId = users.userId LIMIT ? OFFSET ?";
   return await db.runQuerySync(query, [limit, offset]);
+};
+
+module.exports.addLike = async (likes, postId) => {
+  try {
+    let query = `UPDATE posts SET likes = ? WHERE postId = ?`;
+
+    return await db.runQuerySync(query, [likes, postId]);
+  } catch (error) {
+    console.error("Error adding follower:", error.message);
+    console.error("Database error: Could not add follower.");
+  }
+};
+module.exports.checkLike = async (userId) => {
+  try {
+    let query = `SELECT likes FROM posts WHERE postId = ?`;
+
+    return await db.runQuerySync(query, [userId]);
+  } catch (error) {
+    console.error("Error adding follower:", error.message);
+    console.error("Database error: Could not add follower.");
+  }
 };

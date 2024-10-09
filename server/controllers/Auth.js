@@ -176,7 +176,7 @@ module.exports.LoginControllerUsingGoogle = async (req, res) => {
 
     // if (passwordMatch) {
     const token = generateJWTToken({ phone_number, email, userId: userId });
-    await UserLogin(phone_number, token);
+    await UserLogin(email, token);
     res
       .status(SERVER_CREATED_HTTP_CODE)
       .json({ message: "Login successful", token });
