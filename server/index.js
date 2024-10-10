@@ -28,9 +28,17 @@ app.use(bodyParser.json());
 
 app.use(routes);
 
+const onlineUsers = {};
+
 // Socket.IO handling real-time chat
 io.on("connection", (socket) => {
   console.log("New user connected:", socket.id);
+
+  socket.on("join", (userId) => {
+    onlineUsers[userId] = socket.id; // Map userId to socketId
+    io.emit("user_online", userId); // Notify all users that this user is online
+    console.log(`${userId} is online`, onlineUsers);
+  });
 
   socket.on("send_message", async ({ message, sender, receiver }) => {
     const chatId = randomstring.generate();
@@ -40,8 +48,24 @@ io.on("connection", (socket) => {
 
     io.emit("receive_message", result[0]);
   });
+
+  socket.on("typing", (user) => {
+    socket.broadcast.emit("typing", user); // Notify other users who is typing
+  });
+
+  // User stop typing event
+  socket.on("stop_typing", (user) => {
+    socket.broadcast.emit("stop_typing", user); // Notify other users when the user stops typing
+  });
   socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id);
+    const disconnectedUser = Object.keys(onlineUsers).find(
+      (userId) => onlineUsers[userId] === socket.id
+    );
+    if (disconnectedUser) {
+      delete onlineUsers[disconnectedUser]; // Remove user from onlineUsers list
+      io.emit("user_offline", disconnectedUser); // Notify others that user is offline
+      console.log(`${disconnectedUser} is offline`, onlineUsers);
+    }
   });
 });
 
