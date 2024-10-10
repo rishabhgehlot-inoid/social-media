@@ -9,7 +9,7 @@ module.exports.AddChat = async (
 ) => {
   try {
     let query = `INSERT INTO chat (chatId, threadId, userId, sender, receiver, message, createdAt) VALUES( ?,?,?,?,?,?,?)`;
-    return await db.runQuerySync(query, [
+    await db.runQuerySync(query, [
       chatId,
       threadId,
       sender,
@@ -18,6 +18,9 @@ module.exports.AddChat = async (
       message,
       new Date(),
     ]);
+
+    query = `SELECT * FROM chat WHERE chatId = ?`;
+    return await db.runQuerySync(query, [chatId]);
   } catch (error) {
     console.error("Error adding chat:", error.message);
     console.error("Database error: Could not add chat message.");
@@ -25,6 +28,8 @@ module.exports.AddChat = async (
 };
 
 module.exports.fetchChats = async (threadId) => {
+  console.log("i am callling---------------------------->");
+
   try {
     let query = `SELECT * FROM chat WHERE threadId = ? ORDER BY createdAt`;
     return await db.runQuerySync(query, [threadId]);

@@ -1,18 +1,12 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { onValue, push, ref } from "firebase/database";
-import { database } from "../firebase";
+import { io } from "socket.io-client";
 import { SquareArrowLeft } from "lucide-react";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+const socket = io("http://localhost:4010");
 
 const Chat = () => {
-  function createUniqueWord(word1, word2) {
-    const sortedWords = [word1, word2].sort();
-    const uniqueWord = sortedWords.join("-");
-    return uniqueWord;
-  }
-
   const instance = axios.create({
     baseURL: "http://localhost:4010/",
     headers: {
@@ -30,13 +24,14 @@ const Chat = () => {
     if (!validateNewMessage()) return; // Validate the new message
 
     try {
-      await instance.post("/addChat", {
+      const newMessageChat = {
         message: newMessage,
         sender: sender,
         receiver: receiver,
-      });
-      writeUserData(sender, receiver, newMessage);
-      setNewMessage(""); // Reset newMessage after successful post
+      };
+      socket.emit("send_message", newMessageChat);
+
+      setNewMessage("");
       toast.success("Message sent successfully!");
     } catch (error) {
       console.log(error);
@@ -49,7 +44,8 @@ const Chat = () => {
       toast.error("Message cannot be empty!");
       return false;
     }
-    if (newMessage.length > 500) { // Set a max length for messages
+    if (newMessage.length > 500) {
+      // Set a max length for messages
       toast.error("Message is too long! Max length is 500 characters.");
       return false;
     }
@@ -63,7 +59,7 @@ const Chat = () => {
       setUsers(response.data);
     } catch (error) {
       console.log(error);
-      // toast.error("Failed to fetch users.");
+      toast.error("Failed to fetch users.");
     }
   };
 
@@ -74,7 +70,7 @@ const Chat = () => {
       setSender(response.data[0].userId);
     } catch (error) {
       console.log(error);
-      // toast.error("Failed to fetch your details.");
+      toast.error("Failed to fetch your details.");
     }
   };
 
@@ -84,38 +80,30 @@ const Chat = () => {
   }, []);
 
   useEffect(() => {
-    const starCountRef = ref(database, "chats/");
-    const unsubscribe = onValue(starCountRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        setMessages(
-          Object.keys(data)
-            .map((key) => data[key])
-            .filter(
-              (item) => item.threadId === createUniqueWord(sender, receiver)
-            )
-        );
-      }
-    });
-    return () => unsubscribe(); // Cleanup listener on unmount
-  }, [sender, receiver]);
+    socket.on("receive_message", (data) => {
+      console.log("data----------->", data);
 
-  function writeUserData(sender, receiver, message) {
-    const messageData = {
-      sender: sender,
-      receiver: receiver,
-      message: message,
-      threadId: createUniqueWord(sender, receiver),
-      timestamp: Date.now(),
+      setMessages((prevMessages) => [...prevMessages, data]);
+    });
+
+    return () => socket.off("receive_message");
+  }, []);
+
+  useEffect(() => {
+    const handleFetchChat = async () => {
+      instance
+        .post("/fetchChats", {
+          sender,
+          receiver,
+        })
+        .then((response) => {
+          setMessages(response.data);
+          console.log("response.data--------------->", response.data);
+        })
+        .catch((error) => console.error("Error fetching messages:", error));
     };
-
-    const messageRef = ref(database, `chats/`);
-
-    push(messageRef, messageData).catch((error) => {
-      console.log(error);
-      toast.error("Failed to write message data.");
-    });
-  }
+    handleFetchChat();
+  }, [sender, receiver]);
 
   return (
     <div className="w-full h-[calc(100vh-80px)] bg-gray-950 text-white flex animate-fadeIn">
@@ -171,9 +159,7 @@ const Chat = () => {
                 }`}
                 key={index}
               >
-                <span className="bg-black p-2 rounded-md">
-                  {item.message}
-                </span>
+                <span className="bg-black p-2 rounded-md">{item.message}</span>
               </div>
             ))}
         </section>
