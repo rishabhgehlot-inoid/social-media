@@ -1,23 +1,22 @@
 import axios from "axios";
-import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Slider from "../components/EditPostSlider";
 
-const EditPost = () => {
-  const { id } = useParams();
+const AddPost = () => {
   const config = {
     headers: {
       "content-type": "multipart/form-data",
     },
   };
-  const [SelectedImage, setSelectedImage] = useState(null);
-  const [Image, setImage] = useState(null);
-  const [caption, setCaption] = useState("");
-  const [postId, setPostId] = useState("");
-  const navigation = useNavigate();
+  const { id } = useParams();
 
+  const [selectedImages, setSelectedImages] = useState([]); // Handle multiple images
+  const [imagePreviews, setImagePreviews] = useState([]); // Previews for multiple images
+  const [caption, setCaption] = useState("");
+  const navigation = useNavigate();
   const instance = axios.create({
     baseURL: "http://localhost:4010/",
     headers: {
@@ -27,17 +26,16 @@ const EditPost = () => {
   });
 
   const updateImage = (event) => {
-    const file = event.target.files[0];
-    setImage(file);
-    if (file) {
-      setSelectedImage(URL.createObjectURL(file));
-    }
+    const files = Array.from(event.target.files); // Convert FileList to array
+    setSelectedImages(files);
+
+    const previews = files.map((file) => URL.createObjectURL(file));
+    setImagePreviews(previews);
   };
 
   const validateInputs = () => {
-    if (Image && Image.size > 5 * 1024 * 1024) {
-      // 5 MB size limit
-      toast.error("Image size should be less than 5 MB!");
+    if (selectedImages.length === 0) {
+      toast.error("Please select at least one image!");
       return false;
     }
     if (!caption.trim()) {
@@ -51,29 +49,42 @@ const EditPost = () => {
     if (!validateInputs()) return; // Validate inputs before proceeding
 
     const formData = new FormData();
-    formData.append("post", Image);
+    console.log("selectedImages--------->", selectedImages);
+
+    selectedImages.map((image) => {
+      formData.append("post", image);
+    });
     formData.append("caption", caption);
     formData.append("postId", id);
+    console.log("formData------>", formData);
 
     try {
       await instance.post("/updatePost", formData, config);
-      toast.success("Post updated successfully!");
+      toast.success("Post Updated successfully!");
       navigation("/");
     } catch (error) {
       const errorMessage =
-        error.response?.data?.error || "Failed to update post!";
+        error.response?.data?.error || "Failed to create post!";
       toast.error(errorMessage);
       console.error(error);
     }
   };
-
   const handleFetchPost = async () => {
     try {
       const response = await instance.get(`/getPostById?postId=${id}`);
-      console.log(response.data);
-      setCaption(response.data.result[0].caption);
-      setSelectedImage(`http://localhost:4010/${response.data.result[0].post}`);
-      setPostId(response.data.result[0].postId);
+      const post = response.data.result[0]; // Extract the post data
+      setCaption(post.caption);
+
+      // Parse the `post` field as it's a stringified array of image names
+      const imageFilenames = JSON.parse(post.post);
+      setSelectedImages(imageFilenames);
+      console.log("selectedImages", selectedImages);
+
+      const imageUrls = imageFilenames.map(
+        (img) => `http://localhost:4010/${img}`
+      );
+
+      setImagePreviews(imageUrls); // Set all images for preview
     } catch (error) {
       const errorMessage =
         error.response?.data?.error || "Failed to fetch post!";
@@ -81,78 +92,95 @@ const EditPost = () => {
       console.error(error);
     }
   };
-
   useEffect(() => {
     handleFetchPost();
   }, []);
-  const handleDeletePost = async () => {
-    try {
-      console.log("postId ----->", postId);
 
-      const response = await instance.delete(`/deletePost/${postId}`);
-      console.log(response.data);
-      navigation("/");
-    } catch (error) {
-      console.log(error);
-    }
-  };
   return (
-    <div className="text-white flex justify-center p-3 items-center w-screen  md:min-h-screen bg-gray-900">
-      <main className="flex flex-col gap-3 bg-black p-5 rounded-2xl md:min-w-[500px] items-center overflow-y-scroll w-full md:w-[400px]">
-        <h1 className="text-5xl font-bold text-center py-9">Edit Post</h1>
-        {SelectedImage ? (
-          <div className=" relative">
-            <button
-              className="p-3 rounded-2xl bg-red-600 font-bold hover:scale-105 hover:bg-red-800 absolute right-0 top-0 w-fit"
-              onClick={() => {
-                setImage("");
-                setSelectedImage();
-              }}
-            >
-              <X />
-            </button>
-            <img
-              src={`${SelectedImage}`}
-              alt="Current Post"
-              className=" w-full md:w-[400px] rounded-2xl"
-            />
+    <div className="text-white flex justify-center p-3 md:items-center w-screen md:h-screen bg-gray-900 animate-fadeIn ">
+      <main className="flex flex-col gap-3 bg-black p-5 rounded-2xl md:min-w-[500px] items-center overflow-y-scroll">
+        <h1 className="text-3xl md:text-5xl font-bold text-center md:py-9">
+          Update Post
+        </h1>
+        {imagePreviews.length > 0 ? (
+          <div className="grid grid-cols-1">
+            {imagePreviews.length > 0 ? (
+              <div className="grid grid-cols-1 gap-4">
+                {imagePreviews.length > 0 ? (
+                  <div className="w-full">
+                    <Slider
+                      images={imagePreviews}
+                      setImagePreviews={setImagePreviews}
+                      setSelectedImages={setSelectedImages}
+                      imagePreviews={imagePreviews}
+                    />
+                  </div>
+                ) : (
+                  <div className="parent">
+                    <div className="file-upload">
+                      <h3>Click box to upload</h3>
+                      <p>Maximun file size 10mb</p>
+                      <input
+                        type="file"
+                        name="post"
+                        onChange={updateImage}
+                        multiple
+                        accept="image/*"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="parent">
+                <div className="file-upload">
+                  <h3>Click box to upload</h3>
+                  <p>Maximun file size 10mb</p>
+                  <input
+                    type="file"
+                    name="post"
+                    onChange={updateImage}
+                    multiple
+                    accept="image/*"
+                  />
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <div className="parent">
             <div className="file-upload">
-              {/* <img src={uploadImg} alt="upload" /> */}
               <h3>Click box to upload</h3>
               <p>Maximun file size 10mb</p>
-              <input type="file" name="post" onChange={updateImage} />
+              <input
+                type="file"
+                name="post"
+                onChange={updateImage}
+                multiple
+                accept="image/*"
+              />
             </div>
           </div>
         )}
+
         <textarea
           type="text"
-          className="p-3 w-full rounded-2xl bg-gray-950 outline-none hover:scale-105"
+          className="p-3 w-full rounded-2xl bg-gray-950 outline-none "
           placeholder="Caption..."
           name="Caption"
           value={caption}
           onChange={(e) => setCaption(e.target.value)}
         />
-        <div className=" w-full flex items-center gap-4">
-          <button
-            className="p-3 rounded-2xl bg-red-600 font-bold hover:scale-105 hover:bg-red-800 w-full"
-            onClick={handleDeletePost}
-          >
-            Delete
-          </button>
-          <button
-            className="p-3 rounded-2xl bg-orange-600 font-bold hover:scale-105 hover:bg-orange-800 w-full"
-            onClick={handlePost}
-          >
-            Submit
-          </button>
-        </div>
+        <button
+          className="p-3 rounded-2xl bg-orange-600 font-bold w-full"
+          onClick={handlePost}
+        >
+          Submit
+        </button>
       </main>
       <ToastContainer />
     </div>
   );
 };
 
-export default EditPost;
+export default AddPost;

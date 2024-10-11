@@ -1,9 +1,9 @@
 import axios from "axios";
-import { X } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Slider from "../components/EditPostSlider";
 
 const AddPost = () => {
   const config = {
@@ -11,8 +11,8 @@ const AddPost = () => {
       "content-type": "multipart/form-data",
     },
   };
-  const [SelectedImage, setSelectedImage] = useState(null);
-  const [Image, setImage] = useState(null);
+  const [selectedImages, setSelectedImages] = useState([]); // Handle multiple images
+  const [imagePreviews, setImagePreviews] = useState([]); // Previews for multiple images
   const [caption, setCaption] = useState("");
   const navigation = useNavigate();
   const instance = axios.create({
@@ -24,16 +24,16 @@ const AddPost = () => {
   });
 
   const updateImage = (event) => {
-    const file = event.target.files[0];
-    setImage(file);
-    if (file) {
-      setSelectedImage(URL.createObjectURL(file));
-    }
+    const files = Array.from(event.target.files); // Convert FileList to array
+    setSelectedImages(files);
+
+    const previews = files.map((file) => URL.createObjectURL(file));
+    setImagePreviews(previews);
   };
 
   const validateInputs = () => {
-    if (!Image) {
-      toast.error("Please select an image!");
+    if (selectedImages.length === 0) {
+      toast.error("Please select at least one image!");
       return false;
     }
     if (!caption.trim()) {
@@ -47,7 +47,9 @@ const AddPost = () => {
     if (!validateInputs()) return; // Validate inputs before proceeding
 
     const formData = new FormData();
-    formData.append("post", Image);
+    selectedImages.forEach((image) => {
+      formData.append("post", image); // Append each image to formData
+    });
     formData.append("caption", caption);
 
     try {
@@ -65,31 +67,66 @@ const AddPost = () => {
   return (
     <div className="text-white flex justify-center p-3 md:items-center w-screen md:min-h-screen bg-gray-900 animate-fadeIn">
       <main className="flex flex-col gap-3 bg-black p-5 rounded-2xl md:min-w-[500px] items-center">
-        <h1 className=" text-3xl md:text-5xl font-bold text-center md:py-9">Add Post</h1>
-        {SelectedImage ? (
-          <div className=" relative">
-            <button
-              className="p-3 rounded-2xl bg-red-600 font-bold hover:scale-105 hover:bg-red-800 absolute right-0 top-0 w-fit"
-              onClick={() => {
-                setImage("");
-                setSelectedImage();
-              }}
-            >
-              <X />
-            </button>
-            <img
-              src={`${SelectedImage}`}
-              alt="Current Post"
-              className=" w-full md:w-[400px] rounded-2xl"
-            />
+        <h1 className="text-3xl md:text-5xl font-bold text-center md:py-9">
+          Add Post
+        </h1>
+        {imagePreviews.length > 0 ? (
+          <div className="grid grid-cols-1">
+            {imagePreviews.length > 0 ? (
+              <div className="grid grid-cols-1 gap-4">
+                {imagePreviews.length > 0 ? (
+                  <div className="w-full">
+                    <Slider
+                      images={imagePreviews}
+                      setImagePreviews={setImagePreviews}
+                      setSelectedImages={setSelectedImages}
+                      imagePreviews={imagePreviews}
+                    />
+                  </div>
+                ) : (
+                  <div className="parent">
+                    <div className="file-upload">
+                      <h3>Click box to upload</h3>
+                      <p>Maximun file size 10mb</p>
+                      <input
+                        type="file"
+                        name="post"
+                        onChange={updateImage}
+                        multiple
+                        accept="image/*"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="parent">
+                <div className="file-upload">
+                  <h3>Click box to upload</h3>
+                  <p>Maximun file size 10mb</p>
+                  <input
+                    type="file"
+                    name="post"
+                    onChange={updateImage}
+                    multiple
+                    accept="image/*"
+                  />
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <div className="parent">
             <div className="file-upload">
-              {/* <img src={uploadImg} alt="upload" /> */}
               <h3>Click box to upload</h3>
               <p>Maximun file size 10mb</p>
-              <input type="file" name="post" onChange={updateImage} />
+              <input
+                type="file"
+                name="post"
+                onChange={updateImage}
+                multiple
+                accept="image/*"
+              />
             </div>
           </div>
         )}

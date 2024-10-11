@@ -46,28 +46,41 @@ const postIdQuerySchema = Joi.object({
 // Create a new post
 module.exports.CreatePost = async (req, res) => {
   const { caption } = req.body;
+  const token = req.headers["token"];
   const { error } = postSchema.validate({
     caption,
-    token: req.headers["token"],
+    token,
   });
 
+  // Check if validation error exists
   if (error) {
     return res
       .status(SERVER_BAD_REQUEST)
       .json({ error: error.details[0].message });
   }
 
-  const path = `${Date.now()}.png`;
-  const token = req.headers["token"];
+  if (!req.files || req.files.length === 0) {
+    return res.status(SERVER_BAD_REQUEST).json({ error: "No files uploaded." });
+  }
+
+  let paths = [];
+  const decodedToken = jwt.verify(token, process.env.SECRET_KEY);
+  const userId = decodedToken.userId;
 
   try {
-    const decodedToken = jwt.verify(token, process.env.SECRET_KEY);
-    const userId = decodedToken.userId;
+    // Loop through all uploaded files
+    for (let index = 0; index < req.files.length; index++) {
+      const file = req.files[index];
+      const extension = file.mimetype.split("/")[1]; // Extract extension from MIME type
+      const fileName = `${Date.now()}-${index}.${extension}`; // Unique filename with extension
+      paths.push(fileName);
 
-    fs.writeFileSync(`public/${path}`, req.file.buffer);
+      // Save file to disk
+      fs.writeFileSync(`public/${fileName}`, file.buffer);
+    }
 
     const postId = randomstring.generate();
-    await CreatePost(userId, caption, path, postId);
+    await CreatePost(userId, caption, JSON.stringify(paths), postId);
 
     res
       .status(SERVER_CREATED_HTTP_CODE)
@@ -156,7 +169,6 @@ module.exports.getPostByIdController = async (req, res) => {
 module.exports.UpdatePost = async (req, res) => {
   const { caption, postId } = req.body;
   const token = req.headers["token"];
-  let path;
 
   const { error } = postSchema.validate({ caption, token });
   if (error) {
@@ -165,18 +177,27 @@ module.exports.UpdatePost = async (req, res) => {
       .json({ error: error.details[0].message });
   }
 
-  try {
-    const decodedToken = jwt.verify(token, process.env.SECRET_KEY);
-    const phone_number = decodedToken.phone_number;
-    const user = await FindUserByPhoneNumber(phone_number);
-    const userId = user[0].userId;
+  if (!req.files || req.files.length === 0) {
+    return res.status(SERVER_BAD_REQUEST).json({ error: "No files uploaded." });
+  }
 
-    if (req.file) {
-      path = `${Date.now()}.png`;
-      fs.writeFileSync(`public/${path}`, req.file.buffer);
+  let paths = [];
+  const decodedToken = jwt.verify(token, process.env.SECRET_KEY);
+  const userId = decodedToken.userId;
+
+  try {
+    // Loop through all uploaded files
+    for (let index = 0; index < req.files.length; index++) {
+      const file = req.files[index];
+      const extension = file.mimetype.split("/")[1]; // Extract extension from MIME type
+      const fileName = `${Date.now()}-${index}.${extension}`; // Unique filename with extension
+      paths.push(fileName);
+
+      // Save file to disk
+      fs.writeFileSync(`public/${fileName}`, file.buffer);
     }
 
-    await UpdatePost(userId, caption, path, postId);
+    await UpdatePost(userId, caption, JSON.stringify(paths), postId);
     res
       .status(SERVER_CREATED_HTTP_CODE)
       .json({ message: "Post updated successfully!" });

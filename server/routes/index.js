@@ -38,8 +38,8 @@ router.post("/RegisterUsingGoogle", RegisterUserUsingGoogle);
 router.post("/LoginUser", LoginController);
 router.post("/LoginUsingGoogle", LoginControllerUsingGoogle);
 
-router.post("/createPost", upload.single("post"), CreatePost);
-router.post("/updatePost", upload.single("post"), UpdatePost);
+router.post("/createPost", upload.array('post', 12), CreatePost);
+router.post("/updatePost", upload.array("post", 12 ), UpdatePost);
 router.post(
   "/updateProfile",
   upload.single("profile_img"),

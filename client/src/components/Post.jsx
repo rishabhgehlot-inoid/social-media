@@ -3,6 +3,7 @@ import axios from "axios";
 import { Heart, MessageCircle, Send, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Slider from "./Slider";
 
 const Post = ({ post }) => {
   const navigation = useNavigate();
@@ -12,6 +13,7 @@ const Post = ({ post }) => {
   const [showComments, setShowComments] = useState(false);
   const [likes, setLikes] = useState(post.likes ? post.likes.length : 0);
   const [userId, setUserId] = useState("");
+  const [images, setImages] = useState([]);
 
   const instance = axios.create({
     baseURL: "http://localhost:4010/",
@@ -49,7 +51,7 @@ const Post = ({ post }) => {
     try {
       const response = await instance.get(`/getPostById?postId=${post.postId}`);
       setComments(JSON.parse(response.data.result[0].comments));
-      setLikes(JSON.parse(response.data.result[0].likes).length);
+      setLikes(Array(response.data.result[0].likes).length);
     } catch (error) {
       console.log(error);
     }
@@ -63,15 +65,17 @@ const Post = ({ post }) => {
       console.log(error);
     }
   };
+  const fetchData = async () => {
+    setImages(JSON.parse(post.post));
+    console.log("imagesssss-=-----", JSON.parse(post.post));
+    await getUser();
+    await handleChanges();
+    setLikePost(
+      JSON.parse(post.likes).some((follower) => follower.userId === userId)
+    );
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      await getUser();
-      await handleChanges();
-      setLikePost(
-        JSON.parse(post.likes).some((follower) => follower.userId === userId)
-      );
-    };
     fetchData();
   }, [comment, likes, likePost, post, userId, post.likes, post.comments]);
 
@@ -100,11 +104,7 @@ const Post = ({ post }) => {
             <Settings onClick={() => navigation(`/EditPost/${post.postId}`)} />
           )}
         </div>
-        <img
-          src={`http://localhost:4010/${post.post}`}
-          alt={`Post image by ${post.username}`}
-          className=""
-        />
+        <Slider images={images} />
         <p className=" text-left p-3">{post.caption}</p>
         <div className=" flex gap-3 p-3 items-center">
           <Heart

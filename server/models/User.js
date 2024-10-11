@@ -92,13 +92,47 @@ module.exports.AddStory = async (storyId, story_img, userId, createAt) => {
 module.exports.deleteOldStories = async () => {
   const twentyFourHoursAgo = Date.now() - 24 * 60 * 60 * 1000;
 
-  const query = `
-    UPDATE users 
-    SET stories = JSON_ARRAY_FILTER(stories, 
-      (story) -> JSON_UNQUOTE(JSON_EXTRACT(story, '$.createAt')) >= ?) 
-    WHERE userId IN (SELECT userId FROM users WHERE JSON_LENGTH(stories) > 0)`;
+  // Query to select users with stories
+  const selectQuery = `
+    SELECT userId, stories
+    FROM users
+    WHERE JSON_LENGTH(stories) > 0;
+  `;
 
-  await db.runQuerySync(query, [twentyFourHoursAgo]);
+  try {
+    // Fetch users with stories
+    const usersWithStories = await db.runQuerySync(selectQuery);
+
+    for (const user of usersWithStories) {
+      // Parse the stories JSON
+      let stories = JSON.parse(user.stories);
+
+      // Filter stories that are not older than 24 hours
+      const filteredStories = stories.filter((story) => {
+        const storyCreatedAt = story.createAt; // Assuming `createAt` is a timestamp
+        return storyCreatedAt >= twentyFourHoursAgo;
+      });
+
+      // If stories were filtered, update the user's stories
+      if (filteredStories.length !== stories.length) {
+        const updateQuery = `
+          UPDATE users
+          SET stories = ?
+          WHERE userId = ?;
+        `;
+
+        // Run the update query to save the filtered stories back to the database
+        await db.runQuerySync(updateQuery, [
+          JSON.stringify(filteredStories),
+          user.userId,
+        ]);
+      }
+    }
+
+    console.log("Old stories deleted successfully!");
+  } catch (error) {
+    console.error("Error deleting old stories:", error);
+  }
 };
 
 module.exports.addFollower = async (followerId, userId, createAt) => {

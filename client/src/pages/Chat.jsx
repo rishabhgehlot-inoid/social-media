@@ -211,7 +211,7 @@ const Chat = () => {
           ))}
       </main>
       <main
-        className={`flex flex-col justify-between w-full p-4 ${
+        className={`flex flex-col justify-between w-full p-4 pb-[4rem] md:pb-4 ${
           receiver ? "block md:block" : "hidden md:block"
         }`}
       >
