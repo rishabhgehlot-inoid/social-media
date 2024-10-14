@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const socketIo = require("socket.io");
+const fs = require("fs");
 const http = require("http");
 const routes = require("./routes");
 require("dotenv").config();
@@ -10,6 +11,7 @@ const { deleteOldStories } = require("./models/User");
 const randomstring = require("randomstring");
 const createUniqueWord = require("./services/createUniqeId");
 const { AddChat } = require("./models/Chat");
+const { upload } = require("./config/multerConfig");
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
@@ -27,6 +29,19 @@ app.use(bodyParser.urlencoded({ extended: true, limit: "150mb" }));
 app.use(bodyParser.json());
 
 app.use(routes);
+
+app.post("/uploadImage", upload.single("image"), (req, res) => {
+  let path = "";
+  try {
+    if (req.file) {
+      path = `${Date.now()}.png`;
+      fs.writeFileSync(`public/${path}`, req.file.buffer);
+      res.status(200).json({ path });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Image upload failed", error, path });
+  }
+});
 
 const onlineUsers = {};
 
@@ -46,6 +61,14 @@ io.on("connection", (socket) => {
     const result = await AddChat(chatId, threadId, sender, receiver, message);
     console.log("result, I am from socket.io-------------------->");
 
+    io.emit("receive_message", result[0]);
+  });
+
+  socket.on("send_image", async ({ imageUrl, sender, receiver }) => {
+    const chatId = randomstring.generate();
+    const threadId = createUniqueWord(sender, receiver);
+    const message = `<img src="${process.env.BASE_URL}/${imageUrl}" alt="Chat Image" className=" size-24"/>`; // Image as a message
+    const result = await AddChat(chatId, threadId, sender, receiver, message);
     io.emit("receive_message", result[0]);
   });
 

@@ -1,10 +1,9 @@
 /* eslint-disable react/prop-types */
-import axios from "axios";
 import { Heart, MessageCircle, Send, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Slider from "./Slider";
-
+import { instance, SERVER_URL } from "../config/instance";
 const Post = ({ post }) => {
   const navigation = useNavigate();
   const [likePost, setLikePost] = useState(false);
@@ -14,13 +13,6 @@ const Post = ({ post }) => {
   const [likes, setLikes] = useState(post.likes ? post.likes.length : 0);
   const [userId, setUserId] = useState("");
   const [images, setImages] = useState([]);
-
-  const instance = axios.create({
-    baseURL: "http://localhost:4010/",
-    headers: {
-      token: localStorage.getItem("token") || "",
-    },
-  });
 
   const handleLikePost = async (postId) => {
     try {
@@ -94,7 +86,7 @@ const Post = ({ post }) => {
               src={
                 post.profile_img?.includes("googleusercontent")
                   ? post.profile_img
-                  : `http://localhost:4010/${post.profile_img}`
+                  : `${SERVER_URL}/${post.profile_img}`
               }
               className=" w-10 h-10 rounded-full"
             />

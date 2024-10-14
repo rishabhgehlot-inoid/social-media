@@ -1,10 +1,10 @@
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
 import { useState } from "react";
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { auth } from "../firebase";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { instance } from "../config/instance";
 
 const SignUp = () => {
   const provider = new GoogleAuthProvider();
@@ -12,12 +12,6 @@ const SignUp = () => {
     username: "",
     phone_number: "",
     password: "",
-  });
-
-  const instance = axios.create({
-    baseURL: "http://localhost:4010/",
-    timeout: 1000,
-    headers: { "X-Custom-Header": "foobar" },
   });
 
   const navigation = useNavigate();

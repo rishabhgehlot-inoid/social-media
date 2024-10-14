@@ -1,20 +1,13 @@
-import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
-import { SquareArrowLeft } from "lucide-react";
+import { Image, SquareArrowLeft } from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { instance, SERVER_URL } from "../config/instance";
 
-const socket = io("http://localhost:4010");
+const socket = io(SERVER_URL);
 
 const Chat = () => {
-  const instance = axios.create({
-    baseURL: "http://localhost:4010/",
-    headers: {
-      token: localStorage.getItem("token"),
-    },
-  });
-
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [receiver, setReceiver] = useState(0);
@@ -44,7 +37,32 @@ const Chat = () => {
       toast.error("Failed to send message.");
     }
   };
+  const handleNewImage = async (e) => {
+    const file = e.target.files[0]; // Get the selected file
+    if (!file) return;
 
+    const formData = new FormData();
+    formData.append("image", file);
+    formData.append("sender", sender);
+    formData.append("receiver", receiver);
+
+    try {
+      const response = await instance.post("/uploadImage", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      console.log("image", response.data.path);
+
+      socket.emit("send_image", {
+        imageUrl: response.data.path, // URL from server
+        sender,
+        receiver,
+      });
+      toast.success("Image sent successfully!");
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      toast.error("Failed to send image.");
+    }
+  };
   const validateNewMessage = () => {
     if (!newMessage.trim()) {
       toast.error("Message cannot be empty!");
@@ -188,7 +206,7 @@ const Chat = () => {
                       src={
                         item.profile_img.includes("googleusercontent")
                           ? item.profile_img // Google profile image URL
-                          : `http://localhost:4010/${item.profile_img}` // Local image URL
+                          : `${SERVER_URL}/${item.profile_img}` // Local image URL
                       }
                       className="w-20 h-20 rounded-full"
                     />
@@ -215,7 +233,10 @@ const Chat = () => {
           receiver ? "block md:block" : "hidden md:block"
         }`}
       >
-        <section className="w-full h-[90%] md:h-[95%] overflow-y-scroll" ref={chatContainerRef}>
+        <section
+          className="w-full h-[90%] md:h-[95%] overflow-y-scroll"
+          ref={chatContainerRef}
+        >
           <SquareArrowLeft
             onClick={() => {
               setReceiver(0);
@@ -230,7 +251,10 @@ const Chat = () => {
                 }`}
                 key={index}
               >
-                <span className="bg-black p-2 rounded-md">{item.message}</span>
+                <span
+                  className="bg-black p-2 rounded-md max-w-[300px]"
+                  dangerouslySetInnerHTML={{ __html: item.message }}
+                />
               </div>
             ))}
         </section>
@@ -247,6 +271,19 @@ const Chat = () => {
                 if (e.key === "Enter") handleNewMessage();
               }}
             />
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              id="imageUpload"
+              onChange={handleNewImage} // Updated for handling image upload
+            />
+            <label
+              htmlFor="imageUpload"
+              className="cursor-pointer w-fit p-3 bg-black rounded-2xl"
+            >
+              <Image />
+            </label>
             <button
               className="w-fit p-3 bg-black rounded-2xl"
               onClick={handleNewMessage}

@@ -1,8 +1,8 @@
-import axios from "axios";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { instance } from "../config/instance";
 
 const EditProfile = () => {
   const { userId } = useParams();
@@ -19,14 +19,6 @@ const EditProfile = () => {
       "content-type": "multipart/form-data",
     },
   };
-
-  const instance = axios.create({
-    baseURL: "http://localhost:4010/",
-    headers: {
-      "content-type": "multipart/form-data",
-      token: localStorage.getItem("token"),
-    },
-  });
 
   const handleUser = async () => {
     try {

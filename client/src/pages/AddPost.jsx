@@ -1,9 +1,9 @@
-import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Slider from "../components/EditPostSlider";
+import { instance } from "../config/instance";
 
 const AddPost = () => {
   const config = {
@@ -15,13 +15,6 @@ const AddPost = () => {
   const [imagePreviews, setImagePreviews] = useState([]); // Previews for multiple images
   const [caption, setCaption] = useState("");
   const navigation = useNavigate();
-  const instance = axios.create({
-    baseURL: "http://localhost:4010/",
-    headers: {
-      "content-type": "multipart/form-data",
-      token: localStorage.getItem("token"),
-    },
-  });
 
   const updateImage = (event) => {
     const files = Array.from(event.target.files); // Convert FileList to array

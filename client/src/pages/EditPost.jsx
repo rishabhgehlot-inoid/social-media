@@ -1,9 +1,9 @@
-import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Slider from "../components/EditPostSlider";
+import { instance, SERVER_URL } from "../config/instance";
 
 const AddPost = () => {
   const config = {
@@ -17,13 +17,6 @@ const AddPost = () => {
   const [imagePreviews, setImagePreviews] = useState([]); // Previews for multiple images
   const [caption, setCaption] = useState("");
   const navigation = useNavigate();
-  const instance = axios.create({
-    baseURL: "http://localhost:4010/",
-    headers: {
-      "content-type": "multipart/form-data",
-      token: localStorage.getItem("token"),
-    },
-  });
 
   const updateImage = (event) => {
     const files = Array.from(event.target.files); // Convert FileList to array
@@ -80,9 +73,7 @@ const AddPost = () => {
       setSelectedImages(imageFilenames);
       console.log("selectedImages", selectedImages);
 
-      const imageUrls = imageFilenames.map(
-        (img) => `http://localhost:4010/${img}`
-      );
+      const imageUrls = imageFilenames.map((img) => `${SERVER_URL}/${img}`);
 
       setImagePreviews(imageUrls); // Set all images for preview
     } catch (error) {
@@ -90,6 +81,15 @@ const AddPost = () => {
         error.response?.data?.error || "Failed to fetch post!";
       toast.error(errorMessage);
       console.error(error);
+    }
+  };
+  const handleDelete = async () => {
+    try {
+      const response = await instance.delete(`/deletePost/${id}`);
+      console.log(response);
+      navigation("/");
+    } catch (error) {
+      console.log(error);
     }
   };
   useEffect(() => {
@@ -176,6 +176,12 @@ const AddPost = () => {
           onClick={handlePost}
         >
           Submit
+        </button>
+        <button
+          className="p-3 rounded-2xl bg-red-600 font-bold w-full"
+          onClick={handleDelete}
+        >
+          Delete
         </button>
       </main>
       <ToastContainer />

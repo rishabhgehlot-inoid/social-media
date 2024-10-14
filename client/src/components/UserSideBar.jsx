@@ -1,16 +1,11 @@
-import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { instance, SERVER_URL } from "../config/instance";
 
 const UserSideBar = () => {
   const navigation = useNavigate();
   const [users, setUsers] = useState([]);
-  const instance = axios.create({
-    baseURL: "http://localhost:4010/",
-    headers: {
-      token: localStorage.getItem("token"),
-    },
-  });
+
   const handleUsers = async () => {
     try {
       const response = await instance.get("/getAllUsers");
@@ -44,7 +39,7 @@ const UserSideBar = () => {
                           src={
                             item.profile_img.includes("googleusercontent")
                               ? item.profile_img
-                              : `http://localhost:4010/${item.profile_img}`
+                              : `${SERVER_URL}/${item.profile_img}`
                           }
                           className=" w-20 h-20 rounded-full"
                         />

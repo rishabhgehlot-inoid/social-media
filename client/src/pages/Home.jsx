@@ -1,19 +1,13 @@
-import axios from "axios";
 import { useState } from "react";
 import { useEffect } from "react";
 
 import Post from "../components/Post";
 import StroyBlock from "../components/StroyBlock";
+import { instance } from "../config/instance";
 const Home = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [pageNumber, setPageNumber] = useState(1);
-  const instance = axios.create({
-    baseURL: "http://localhost:4010/",
-    headers: {
-      token: localStorage.getItem("token"),
-    },
-  });
   const handlePost = async () => {
     try {
       const response = await instance.get(`fetchPost?page=${pageNumber}`);

@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useEffect, useState } from "react";
+import { SERVER_URL } from "../config/instance";
 
 const Slider = ({ images }) => {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -34,7 +35,7 @@ const Slider = ({ images }) => {
                 }`}
               >
                 <img
-                  src={`http://localhost:4010/${image}`}
+                  src={`${SERVER_URL}/${image}`}
                   className="block w-full h-full object-cover"
                   alt={`Slide ${index + 1}`}
                 />

@@ -1,17 +1,12 @@
-import axios from "axios";
 import { useState } from "react";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { instance, SERVER_URL } from "../config/instance";
 
 const Friends = () => {
   const [posts, setPosts] = useState([]);
   const navigation = useNavigate();
-  const instance = axios.create({
-    baseURL: "http://localhost:4010/",
-    headers: {
-      token: localStorage.getItem("token"),
-    },
-  });
+
   const handlePost = async () => {
     try {
       const response = await instance.get("/getAllUsers");
@@ -51,7 +46,7 @@ const Friends = () => {
                     src={
                       item.profile_img.includes("googleusercontent")
                         ? item.profile_img // Google profile image URL
-                        : `http://localhost:4010/${item.profile_img}` // Local image URL
+                        : `${SERVER_URL}/${item.profile_img}` // Local image URL
                     }
                     className=" w-24 h-24 rounded-full"
                   />

@@ -1,17 +1,10 @@
-import axios from "axios";
 import { useEffect, useState } from "react";
 import Stories from "react-insta-stories";
+import { instance, SERVER_URL } from "../config/instance";
 
 const StroyBlock = () => {
   const [users, setUsers] = useState([]);
   const [activeUserIndex, setActiveUserIndex] = useState(null);
-
-  const instance = axios.create({
-    baseURL: "http://localhost:4010/",
-    headers: {
-      token: localStorage.getItem("token"),
-    },
-  });
 
   const handleUsers = async () => {
     try {
@@ -55,7 +48,7 @@ const StroyBlock = () => {
                           src={
                             item.profile_img.includes("googleusercontent")
                               ? item.profile_img
-                              : `http://localhost:4010/${item.profile_img}`
+                              : `${SERVER_URL}/${item.profile_img}`
                           }
                           className="md:w-20 md:h-20 w-16 h-16 rounded-full bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 p-1"
                         />
@@ -81,7 +74,7 @@ const StroyBlock = () => {
             stories={
               users[activeUserIndex]?.stories.length > 0
                 ? JSON.parse(users[activeUserIndex].stories).map((story) => ({
-                    url: `http://localhost:4010/${story.story_img}`,
+                    url: `${SERVER_URL}/${story.story_img}`,
                   }))
                 : [{ url: "" }]
             }

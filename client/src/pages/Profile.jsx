@@ -1,21 +1,14 @@
-import axios from "axios";
-
 import { useRef, useState } from "react";
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Post from "../components/Post";
 import { X } from "lucide-react";
+import { instance, SERVER_URL } from "../config/instance";
 const Profile = () => {
   const { username } = useParams();
   const [posts, setPosts] = useState([]);
   const [story, setStory] = useState(null);
   const [addStory, setAddStory] = useState(false);
-  const instance = axios.create({
-    baseURL: "http://localhost:4010/",
-    headers: {
-      token: localStorage.getItem("token"),
-    },
-  });
   const [isScrolling, setIsScrolling] = useState(false); // Track if scrolling has started
   const mainRef = useRef(null);
   const handlePost = async () => {
@@ -92,7 +85,7 @@ const Profile = () => {
               }}
             />
             {story ? (
-              <img src={URL.createObjectURL(story)} />
+              <img src={URL.createObjectURL(story)} className=" md:h-[500px]" />
             ) : (
               <div className="parent">
                 <div className="file-upload">
@@ -128,7 +121,7 @@ const Profile = () => {
               src={
                 posts[0].profile_img.includes("googleusercontent")
                   ? posts[0].profile_img // Google profile image URL
-                  : `http://localhost:4010/${posts[0].profile_img}` // Local image URL
+                  : `${SERVER_URL}/${posts[0].profile_img}` // Local image URL
               }
               className={` rounded-full ${
                 isScrolling
