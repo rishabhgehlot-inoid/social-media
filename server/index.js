@@ -16,20 +16,21 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: "https://localhost:3000",
     methods: ["GET", "POST"],
   },
 });
 
+// Use Map for onlineUsers for better performance
+const onlineUsers = new Map();
+
 app.use(express.static("public"));
 app.use(cors());
-
-app.use(express.static("public"));
 app.use(bodyParser.urlencoded({ extended: true, limit: "150mb" }));
 app.use(bodyParser.json());
-
 app.use(routes);
 
+// Image upload route
 app.post("/uploadImage", upload.single("image"), (req, res) => {
   let path = "";
   try {
@@ -43,55 +44,97 @@ app.post("/uploadImage", upload.single("image"), (req, res) => {
   }
 });
 
-const onlineUsers = {};
-
-// Socket.IO handling real-time chat
+// Handle real-time chat and signaling
 io.on("connection", (socket) => {
   console.log("New user connected:", socket.id);
 
   socket.on("join", (userId) => {
-    onlineUsers[userId] = socket.id; // Map userId to socketId
+    onlineUsers.set(userId, socket.id); // Map userId to socketId
     io.emit("user_online", userId); // Notify all users that this user is online
-    console.log(`${userId} is online`, onlineUsers);
+    console.log(`${userId} is online`, Array.from(onlineUsers.entries()));
   });
 
   socket.on("send_message", async ({ message, sender, receiver }) => {
     const chatId = randomstring.generate();
     const threadId = createUniqueWord(sender, receiver);
     const result = await AddChat(chatId, threadId, sender, receiver, message);
-    console.log("result, I am from socket.io-------------------->");
-
     io.emit("receive_message", result[0]);
   });
 
   socket.on("send_image", async ({ imageUrl, sender, receiver }) => {
     const chatId = randomstring.generate();
     const threadId = createUniqueWord(sender, receiver);
-    const message = `<img src="${process.env.BASE_URL}/${imageUrl}" alt="Chat Image" className=" size-24"/>`; // Image as a message
+    const message = `<img src="${process.env.BASE_URL}/${imageUrl}" alt="Chat Image" className=" size-24"/>`;
     const result = await AddChat(chatId, threadId, sender, receiver, message);
     io.emit("receive_message", result[0]);
   });
 
-  socket.on("typing", (user) => {
-    socket.broadcast.emit("typing", user); // Notify other users who is typing
+  // Video call signaling
+  socket.on("video_call_signal", (data) => {
+    const { to, signal } = data;
+    const receiverSocket = onlineUsers.get(to);
+    if (receiverSocket) {
+      io.to(receiverSocket).emit("receive_video_call_signal", {
+        signal,
+        from: socket.id,
+      });
+    }
   });
 
-  // User stop typing event
-  socket.on("stop_typing", (user) => {
-    socket.broadcast.emit("stop_typing", user); // Notify other users when the user stops typing
+  // Accept video call
+  socket.on("accept_video_call", (data) => {
+    const { to, signal } = data;
+    const callerSocket = onlineUsers.get(to);
+    if (callerSocket) {
+      io.to(callerSocket).emit("accept_video_call", signal);
+    }
   });
+
+  // Voice call signaling
+  socket.on("voice_call_signal", (data) => {
+    const { to, signal } = data;
+    const receiverSocket = onlineUsers.get(to);
+    if (receiverSocket) {
+      io.to(receiverSocket).emit("receive_voice_call_signal", {
+        signal,
+        from: socket.id,
+      });
+    }
+  });
+
+  // Accept voice call
+  socket.on("accept_voice_call", (data) => {
+    const { to, signal } = data;
+    const callerSocket = onlineUsers.get(to);
+    if (callerSocket) {
+      io.to(callerSocket).emit("accept_voice_call", signal);
+    }
+  });
+
+  // Handle typing indicator
+  socket.on("typing", (user) => {
+    socket.broadcast.emit("typing", user);
+  });
+
+  // Handle stop typing event
+  socket.on("stop_typing", (user) => {
+    socket.broadcast.emit("stop_typing", user);
+  });
+
+  // Handle disconnect
   socket.on("disconnect", () => {
-    const disconnectedUser = Object.keys(onlineUsers).find(
-      (userId) => onlineUsers[userId] === socket.id
+    const disconnectedUser = Array.from(onlineUsers.entries()).find(
+      ([userId, socketId]) => socketId === socket.id
     );
     if (disconnectedUser) {
-      delete onlineUsers[disconnectedUser]; // Remove user from onlineUsers list
-      io.emit("user_offline", disconnectedUser); // Notify others that user is offline
-      console.log(`${disconnectedUser} is offline`, onlineUsers);
+      onlineUsers.delete(disconnectedUser[0]);
+      io.emit("user_offline", disconnectedUser[0]);
+      console.log(`${disconnectedUser[0]} is offline`, Array.from(onlineUsers.entries()));
     }
   });
 });
 
+// Cron job to delete old stories
 cron.schedule("0 * * * *", async () => {
   try {
     await deleteOldStories();
@@ -101,7 +144,6 @@ cron.schedule("0 * * * *", async () => {
 });
 
 const port = process.env.PORT || 4010;
-
 server.listen(port, () => {
   console.log(`Server started on port ${port}`);
 });
