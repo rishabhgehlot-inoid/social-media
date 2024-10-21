@@ -22,6 +22,7 @@ const {
 } = require("../models/Post");
 const { FindUserByPhoneNumber } = require("../models/Auth");
 const res = require("express/lib/response");
+const { post } = require("../routes");
 
 // Validation schemas
 const postSchema = Joi.object({
@@ -156,9 +157,16 @@ module.exports.getPostByIdController = async (req, res) => {
   const { postId } = req.query;
   try {
     const result = await getPostById(postId);
+
+    const posts = await result.map((item) => {
+      return {
+        comments: JSON.parse(item.comments),
+        likes: JSON.parse(item.likes),
+      };
+    });
     res
       .status(SERVER_CREATED_HTTP_CODE)
-      .json({ result, message: "Post fetched successfully!" });
+      .json({ posts, message: "Post fetched successfully!" });
   } catch (error) {
     console.error("Error fetching post:", error.message);
     res.status(SERVER_INTERNAL_ERROR).json({ error: "Failed to fetch post." });
@@ -234,8 +242,21 @@ module.exports.paginationControllerForPosts = async (req, res) => {
   let offset = (page - 1) * limit;
   try {
     const response = await paginationPosts(offset, limit);
-    console.log(response);
-    res.status(200).json(response);
+    // console.log("response", response);
+    let userPosts = await response.map((item) => {
+      return {
+        id: item.id,
+        likes: JSON.parse(item.likes),
+        postId: item.postId,
+        username: item.username,
+        profile_img: item.profile_img,
+        token: item.token,
+        caption: item.caption,
+        post: JSON.parse(item.post),
+        comment: JSON.parse(item.comments),
+      };
+    });
+    res.status(200).json(userPosts);
   } catch (error) {
     console.log(error);
     res.status(400).json(error);
@@ -252,7 +273,6 @@ module.exports.addLike = async (req, res) => {
 
     // Fetch the current following list
     let likes = await checkLike(postId);
-    console.log("likes------------>", likes);
 
     if (likes && likes.length > 0 && likes[0].likes != "") {
       likes = JSON.parse(likes[0].likes);
@@ -262,7 +282,7 @@ module.exports.addLike = async (req, res) => {
 
     // Check if the user is already following the userId
     const isAlreadyLiked = likes.some((follower) => follower.userId === userId);
-
+    // console.log("\n", "likes------------>", likes, "\n");
     if (isAlreadyLiked) {
       likes = JSON.stringify(likes.filter((like) => like.userId !== userId));
       await addLike(likes, postId);

@@ -11,7 +11,6 @@ const Home = () => {
   const handlePost = async () => {
     try {
       const response = await instance.get(`fetchPost?page=${pageNumber}`);
-      console.log(response.data);
       setPosts([...posts, ...response.data]);
       setLoading(false);
     } catch (error) {

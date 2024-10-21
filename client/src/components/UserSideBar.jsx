@@ -20,7 +20,7 @@ const UserSideBar = () => {
     handleUsers();
   }, []);
   return (
-    <div className=" hidden md:block">
+    <div className=" hidden lg:block">
       <main
         className={` md:w-[500px] w-full bg-gray-950 text-white h-full overflow-y-scroll right-0`}
       >

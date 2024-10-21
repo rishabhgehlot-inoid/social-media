@@ -11,7 +11,7 @@ const Search = () => {
   const handlePost = async () => {
     try {
       const response = await instance.get(`/getAllUsers?search=${searchQuery}`);
-      console.log(response.data);
+      console.log("response.data", response.data);
       setPosts(response.data);
     } catch (error) {
       console.log(error);
@@ -79,7 +79,17 @@ const Search = () => {
                   className=" md:px-4 py-2 bg-gray-950 rounded-xl w-full"
                   onClick={() => handleFollow(item?.userId)}
                 >
-                  Follow
+                  {item.following && item.following.length > 0 ? (
+                    item.following.some(
+                      (follow) => follow.followerId === item.myId
+                    ) ? (
+                      <div>Following</div>
+                    ) : (
+                      <div>Follow</div>
+                    )
+                  ) : (
+                    <div>Follow</div>
+                  )}
                 </button>
               </div>
             </section>

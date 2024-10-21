@@ -163,7 +163,9 @@ const Profile = () => {
         ref={mainRef}
       >
         {posts.map((item) => {
-          return <Post post={item} key={posts.postId} />;
+          console.log(item);
+
+          return <Post post={item} key={posts.id} />;
         })}
       </main>
     </div>

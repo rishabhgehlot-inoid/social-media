@@ -1,9 +1,11 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import { Heart, MessageCircle, Send, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Slider from "./Slider";
 import { instance, SERVER_URL } from "../config/instance";
+
 const Post = ({ post }) => {
   const navigation = useNavigate();
   const [likePost, setLikePost] = useState(false);
@@ -42,8 +44,10 @@ const Post = ({ post }) => {
   const handleChanges = async () => {
     try {
       const response = await instance.get(`/getPostById?postId=${post.postId}`);
-      setComments(JSON.parse(response.data.result[0].comments));
-      setLikes(Array(response.data.result[0].likes).length);
+      const { likes, comments } = await response.data.posts[0];
+
+      setComments([...comments]);
+      // setLikes([...likes]);
     } catch (error) {
       console.log(error);
     }
@@ -58,18 +62,15 @@ const Post = ({ post }) => {
     }
   };
   const fetchData = async () => {
-    setImages(JSON.parse(post.post));
-    console.log("imagesssss-=-----", JSON.parse(post.post));
+    setImages(post.post);
     await getUser();
     await handleChanges();
-    setLikePost(
-      JSON.parse(post.likes).some((follower) => follower.userId === userId)
-    );
+    setLikePost(post.likes.some((follower) => follower.userId === userId));
   };
 
   useEffect(() => {
     fetchData();
-  }, [comment, likes, likePost, post, userId, post.likes, post.comments]);
+  }, [comment, post, userId, post.likes, post.comments]);
 
   return (
     post.postId && (
@@ -113,7 +114,7 @@ const Post = ({ post }) => {
               <h3 className=" font-bold">Comments</h3>
               {comments?.length > 0 ? (
                 comments.map((item, index) => (
-                  <div key={index}>{item.comment}</div>
+                  <div key={comment.createAt}>{item.comment}</div>
                 ))
               ) : (
                 <p>Comments are not found</p>

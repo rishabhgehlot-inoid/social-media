@@ -79,7 +79,21 @@ module.exports.getUserWithPosts = async (req, res) => {
     const phone_number = decodedToken.phone_number;
     const email = decodedToken.email;
     const result = await getUserWithPosts(phone_number, email);
-    res.status(SERVER_CREATED_HTTP_CODE).json(result);
+
+    let userPosts = await result.map((item) => {
+      return {
+        id: item.id,
+        likes: JSON.parse(item.likes),
+        postId: item.postId,
+        username: item.username,
+        profile_img: item.profile_img,
+        token: item.token,
+        caption: item.caption,
+        post: JSON.parse(item.post),
+        comment: JSON.parse(item.comments),
+      };
+    });
+    res.status(SERVER_CREATED_HTTP_CODE).json(userPosts);
   } catch (error) {
     console.error("Error fetching user with posts:", error.message);
     res
@@ -98,9 +112,22 @@ module.exports.getAllUsersController = async (req, res) => {
   }
 
   const search = req.query.search || "";
+  const token = req.headers["token"];
+  const decodedToken = jwt.verify(token, process.env.SECRET_KEY);
+  const userId = decodedToken.userId;
   try {
     const result = await getAllUsers(search);
-    res.status(SERVER_CREATED_HTTP_CODE).json(result);
+    const users = result.map((item) => {
+      return {
+        userId: item.userId,
+        profile_img: item.profile_img,
+        username: item.username,
+        following: JSON.parse(item.following),
+        myId: userId,
+        userId: item.userId,
+      };
+    });
+    res.status(SERVER_CREATED_HTTP_CODE).json(users);
   } catch (error) {
     console.error("Error fetching users:", error.message);
     res.status(SERVER_INTERNAL_ERROR).json({ error: "Failed to fetch users." });
@@ -119,7 +146,22 @@ module.exports.getUserByUsername = async (req, res) => {
   const { username } = req.query;
   try {
     const result = await getUserByUsername(username);
-    res.status(SERVER_CREATED_HTTP_CODE).json(result);
+    let userPosts = await result.map((item) => {
+      return {
+        id: item.id,
+        likes: JSON.parse(item.likes),
+        postId: item.postId,
+        username: item.username,
+        profile_img: item.profile_img,
+        token: item.token,
+        caption: item.caption,
+        post: JSON.parse(item.post),
+        comment: JSON.parse(item.comments),
+      };
+    });
+    console.log(userPosts);
+
+    res.status(SERVER_CREATED_HTTP_CODE).json(userPosts);
   } catch (error) {
     console.error("Error fetching user by username:", error.message);
     res
@@ -230,19 +272,19 @@ module.exports.addFollower = async (req, res) => {
     const decodedToken = jwt.verify(token, process.env.SECRET_KEY);
     const userId = decodedToken.userId;
 
-    // Fetch the current following list
+    // Fetch the current following list and parse it
     let following = await checkFollowing(userId);
+    following = JSON.parse(following) || [];
 
-    // If 'following' is a string, parse it
-    if (following && following.length > 0) {
-      following = JSON.parse(following[0].following);
-    } else {
-      following = [];
-    }
+    // Initialize following array if it's null or empty
+    following =
+      following[0]?.following && following[0].following.length > 0
+        ? following[0].following
+        : [];
 
     // Check if the user is already following the followerId
     const isAlreadyFollowing = following.some(
-      (follower) => follower.followerId === followerId
+      (follower) => follower.followerId === userId
     );
 
     if (isAlreadyFollowing) {
@@ -257,14 +299,17 @@ module.exports.addFollower = async (req, res) => {
     // Send success response
     res.status(201).json({ message: "Following updated successfully!" });
   } catch (error) {
+    // Handle token verification failure separately
+    if (error.name === "JsonWebTokenError") {
+      return res.status(401).json({ error: "Invalid token." });
+    }
+
     console.error("Error updating following:", error.message);
     res.status(500).json({ error: "Failed to update following." });
   }
 };
 
 module.exports.deleteStroy = async () => {
-
-
   try {
     // Verify and decode the JWT token
     const decodedToken = jwt.verify(token, process.env.SECRET_KEY);
