@@ -120,7 +120,62 @@ io.on("connection", (socket) => {
   socket.on("stop_typing", (user) => {
     socket.broadcast.emit("stop_typing", user);
   });
+  const games = new Map();
 
+  // Create a new game
+  socket.on("create_game", (data) => {
+    const { gameId, player1 } = data;
+    socket.join(gameId);
+    games.set(gameId, {
+      players: { X: player1, O: null }, // Initial players
+      board: Array(9).fill(null), // Initial board state
+      currentPlayer: "X", // Player X starts
+    });
+    socket.emit("game_created", { gameId, player1 });
+    console.log(`Game created by ${player1} with ID: ${gameId}`);
+  });
+
+  // Join an existing game
+  socket.on("join_game", (data) => {
+    const { gameId, player2 } = data;
+    console.log(`Attempting to join game ID: ${gameId} for player: ${player2}`); // Debug log
+    const game = games.get(gameId);
+
+    if (game) {
+      if (!game.players.O) {
+        socket.join(gameId);
+        game.players.O = player2; // Assign Player O
+        socket.emit("join_game", { gameId: "game123", player2: "Player2" });
+        // Send the current board state to the joining player
+        socket.emit("game_state", game.board); // Send current board state
+        io.in(gameId).emit("move_made", { player: "X", index: null }); // Notify that Player O has joined
+        console.log(`${player2} joined the game ${gameId}`);
+      } else {
+        socket.emit("error_message", "Game is full"); // Changed message for clarity
+      }
+    } else {
+      socket.emit("error_message", "Game does not exist"); // Message for non-existent game
+    }
+  });
+
+  // Make a move in the game
+  socket.on("make_move", (data) => {
+    const { gameId, player, index } = data;
+    const game = games.get(gameId);
+
+    if (game) {
+      // Check if it's the correct player's turn
+      if (game.currentPlayer === player && !game.board[index]) {
+        game.board[index] = player; // Update the board
+        game.currentPlayer = player === "X" ? "O" : "X"; // Switch turns
+        io.in(gameId).emit("move_made", { player, index }); // Notify all players about the move
+      } else {
+        socket.emit("error_message", "Not your turn or spot already taken");
+      }
+    } else {
+      socket.emit("error_message", "Game does not exist");
+    }
+  });
   // Handle disconnect
   socket.on("disconnect", () => {
     const disconnectedUser = Array.from(onlineUsers.entries()).find(
@@ -129,7 +184,10 @@ io.on("connection", (socket) => {
     if (disconnectedUser) {
       onlineUsers.delete(disconnectedUser[0]);
       io.emit("user_offline", disconnectedUser[0]);
-      console.log(`${disconnectedUser[0]} is offline`, Array.from(onlineUsers.entries()));
+      console.log(
+        `${disconnectedUser[0]} is offline`,
+        Array.from(onlineUsers.entries())
+      );
     }
   });
 });

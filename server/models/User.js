@@ -135,23 +135,14 @@ module.exports.deleteOldStories = async () => {
   }
 };
 
-module.exports.addFollower = async (followerId, userId, createAt) => {
+module.exports.addFollower = async (follows, userId) => {
   try {
     let query = `
       UPDATE users 
-      SET following = COALESCE(
-          JSON_ARRAY_APPEND(following, '$', JSON_OBJECT('followerId', ?, 'createAt', ?)),
-          JSON_ARRAY(JSON_OBJECT('followerId', ?, 'createAt', ?))
-      ) 
+      SET following = ?
       WHERE userId = ?`;
 
-    return await db.runQuerySync(query, [
-      followerId,
-      createAt,
-      followerId,
-      createAt,
-      userId,
-    ]);
+    return await db.runQuerySync(query, [follows, userId]);
   } catch (error) {
     console.error("Error adding follower:", error.message);
     console.error("Database error: Could not add follower.");

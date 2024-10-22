@@ -7,12 +7,17 @@ const Search = () => {
   const navigation = useNavigate();
   const [posts, setPosts] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-
+  const [myUser, setMyUser] = useState([]);
+  const [count, setCount] = useState(0);
   const handlePost = async () => {
     try {
       const response = await instance.get(`/getAllUsers?search=${searchQuery}`);
       console.log("response.data", response.data);
       setPosts(response.data);
+
+      const myUserResponse = await instance.get("/getUser");
+      setMyUser(myUserResponse.data[0]);
+      console.log("myUser", myUserResponse.data[0]);
     } catch (error) {
       console.log(error);
     }
@@ -24,12 +29,13 @@ const Search = () => {
     return () => {
       clearTimeout(timer);
     };
-  }, [searchQuery]);
+  }, [searchQuery, count]);
   const handleFollow = async (followerId) => {
     try {
       const response = await instance.post("/follow", {
         followerId,
       });
+      setCount(count + 1);
       console.log(response);
     } catch (error) {
       console.log(error);
@@ -76,12 +82,13 @@ const Search = () => {
                   View
                 </button>
                 <button
-                  className=" md:px-4 py-2 bg-gray-950 rounded-xl w-full"
+                  className="md:px-4 py-2 bg-gray-950 rounded-xl w-full"
                   onClick={() => handleFollow(item?.userId)}
                 >
-                  {item.following && item.following.length > 0 ? (
-                    item.following.some(
-                      (follow) => follow.followerId === item.myId
+                  {myUser.following && myUser.following.length > 0 ? (
+                    // Check if the user is already following this item
+                    myUser.following.some(
+                      (follower) => follower.followerId === item.userId
                     ) ? (
                       <div>Following</div>
                     ) : (

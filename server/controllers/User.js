@@ -55,7 +55,13 @@ module.exports.getUser = async (req, res) => {
     const decodedToken = jwt.verify(token, process.env.SECRET_KEY);
     const userId = decodedToken.userId;
     const result = await getUser(userId);
-    res.status(SERVER_CREATED_HTTP_CODE).json(result);
+    const User = result.map((item) => {
+      return {
+        following: JSON.parse(item.following),
+        userId: item.userId,
+      };
+    });
+    res.status(SERVER_CREATED_HTTP_CODE).json(User);
   } catch (error) {
     console.error("Error fetching user:", error.message);
     res
@@ -117,14 +123,17 @@ module.exports.getAllUsersController = async (req, res) => {
   const userId = decodedToken.userId;
   try {
     const result = await getAllUsers(search);
+    console.log("result", result);
+
     const users = result.map((item) => {
       return {
         userId: item.userId,
         profile_img: item.profile_img,
         username: item.username,
-        following: JSON.parse(item.following),
+        following: JSON.parse(item.following) || [],
         myId: userId,
         userId: item.userId,
+        stories: JSON.parse(item.stories),
       };
     });
     res.status(SERVER_CREATED_HTTP_CODE).json(users);
@@ -274,17 +283,14 @@ module.exports.addFollower = async (req, res) => {
 
     // Fetch the current following list and parse it
     let following = await checkFollowing(userId);
-    following = JSON.parse(following) || [];
+    following = await JSON.parse(following[0].following);
 
     // Initialize following array if it's null or empty
-    following =
-      following[0]?.following && following[0].following.length > 0
-        ? following[0].following
-        : [];
+    following = Array.isArray(following) ? following : [];
 
     // Check if the user is already following the followerId
     const isAlreadyFollowing = following.some(
-      (follower) => follower.followerId === userId
+      (follower) => follower.followerId === followerId
     );
 
     if (isAlreadyFollowing) {
@@ -294,7 +300,13 @@ module.exports.addFollower = async (req, res) => {
     }
 
     // Add the new follower
-    await addFollower(followerId, userId, Date.now());
+    following.push({
+      followerId: followerId,
+      createAt: Date.now(),
+    });
+
+    // Save the updated following list
+    await addFollower(JSON.stringify(following), userId);
 
     // Send success response
     res.status(201).json({ message: "Following updated successfully!" });

@@ -42,8 +42,8 @@ const Chat = () => {
       const audioTrack = stream.getAudioTracks()[0]; // Check if audio track exists and is enabled
       console.log("Is audio track enabled:", audioTrack.enabled);
       if (stream.active) {
-        const peer = new SimplePeer({ initiator: true, stream });
-        setPeer(peer);
+        const myPeer = new SimplePeer({ initiator: true, stream });
+        setPeer(myPeer);
 
         // Emit signal to receiver to start the video call
         peer.on("signal", (data) => {
@@ -199,6 +199,8 @@ const Chat = () => {
     try {
       const response = await instance.get("/getUser");
       console.log(response.data, "it is me ----------------");
+      console.log(response.data);
+
       setSender(response.data[0].userId);
       socket.emit("join", response.data[0].userId);
     } catch (error) {

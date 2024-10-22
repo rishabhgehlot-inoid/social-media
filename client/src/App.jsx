@@ -16,6 +16,7 @@ import EditPost from "./pages/EditPost";
 import SideBar from "./components/SideBar";
 import UserSideBar from "./components/UserSideBar";
 import MobileNav from "./components/MobileNav";
+import TicTacToe from "./pages/TicTacToe";
 
 // eslint-disable-next-line react/prop-types
 const Layout = ({ children }) => {
@@ -60,6 +61,7 @@ const App = () => {
     { path: "/search", element: <Search /> },
     { path: "/add-post", element: <AddPost /> },
     { path: "/EditPost/:id", element: <EditPost /> },
+    { path: "/tictoctoe", element: <TicTacToe /> },
   ];
 
   return (

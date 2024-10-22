@@ -35,7 +35,7 @@ const StroyBlock = () => {
         {users.length > 0 &&
           users.map(
             (item, index) =>
-              JSON.parse(item.stories).length > 0 && (
+              item.stories.length > 0 && (
                 <div
                   className={`md:p-4 p-2`}
                   key={item.userId}
@@ -73,7 +73,7 @@ const StroyBlock = () => {
           <Stories
             stories={
               users[activeUserIndex]?.stories.length > 0
-                ? JSON.parse(users[activeUserIndex].stories).map((story) => ({
+                ? users[activeUserIndex].stories.map((story) => ({
                     url: `${SERVER_URL}/${story.story_img}`,
                   }))
                 : [{ url: "" }]

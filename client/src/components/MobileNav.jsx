@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 
 const MobileNav = () => {
   return (
-    <div className=" w-screen bg-gray-950 p-2 flex  fixed bottom-0 left-0 md:hidden">
+    <div className=" w-screen bg-gray-950 p-2 flex  fixed bottom-0 left-0 md:hidden z-50">
       <ul className=" w-full flex justify-evenly">
         <NavLink
           to={"/"}
