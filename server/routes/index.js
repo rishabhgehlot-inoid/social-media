@@ -30,6 +30,7 @@ const {
 } = require("../controllers/User");
 const { getAllUsers } = require("../models/User");
 const { AddChat, fetchChats } = require("../controllers/Chat");
+const run = require("../services/gemini");
 const router = express.Router();
 
 router.post("/createUserTable", CreateTable);
@@ -38,8 +39,8 @@ router.post("/RegisterUsingGoogle", RegisterUserUsingGoogle);
 router.post("/LoginUser", LoginController);
 router.post("/LoginUsingGoogle", LoginControllerUsingGoogle);
 
-router.post("/createPost", upload.array('post', 12), CreatePost);
-router.post("/updatePost", upload.array("post", 12 ), UpdatePost);
+router.post("/createPost", upload.array("post", 12), CreatePost);
+router.post("/updatePost", upload.array("post", 12), UpdatePost);
 router.post(
   "/updateProfile",
   upload.single("profile_img"),
@@ -52,7 +53,11 @@ router.get("/getUserWithPosts", getUserWithPosts);
 router.get("/getAllUsers", getAllUsersController);
 router.get("/getUserByUsername", getUserByUsername);
 router.post("/likePost", addLike);
-router.post("/addComment", AddCommentByPostController);
+router.post(
+  "/addComment",
+  upload.single("comment"),
+  AddCommentByPostController
+);
 
 router.post("/addChat", AddChat);
 router.post("/follow", addFollower);
@@ -60,5 +65,6 @@ router.post("/fetchChats", fetchChats);
 router.get("/getPostById", getPostByIdController);
 router.delete("/deletePost/:postId", deleteByPostId);
 router.get("/fetchPost", paginationControllerForPosts);
+
 
 module.exports = router;

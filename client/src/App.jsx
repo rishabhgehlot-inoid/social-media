@@ -17,6 +17,7 @@ import SideBar from "./components/SideBar";
 import UserSideBar from "./components/UserSideBar";
 import MobileNav from "./components/MobileNav";
 import TicTacToe from "./pages/TicTacToe";
+import { ToastContainer } from "react-toastify";
 
 // eslint-disable-next-line react/prop-types
 const Layout = ({ children }) => {
@@ -29,6 +30,7 @@ const Layout = ({ children }) => {
         <UserSideBar />
       </div>
       <MobileNav />
+      <ToastContainer />
     </main>
   ) : (
     <Navigate to="/login" replace={true} />

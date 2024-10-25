@@ -6,6 +6,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { instance, SERVER_URL } from "../config/instance";
 import SimplePeer from "simple-peer";
 const socket = io(SERVER_URL);
+import botImg from "../assets/bot.jpg";
 
 const Chat = () => {
   const [messages, setMessages] = useState([]);
@@ -28,6 +29,7 @@ const Chat = () => {
 
   const userVideoRef = useRef();
   const remoteVideoRef = useRef();
+  const chatbotUserId = "chatbot";
 
   const [isReceivingVideoCall, setIsReceivingVideoCall] = useState(false);
   const [incomingVideoCall, setIncomingVideoCall] = useState(null);
@@ -188,7 +190,14 @@ const Chat = () => {
     try {
       const response = await instance.get("/getAllUsers");
       console.log(response.data);
-      setUsers(response.data);
+      setUsers([
+        {
+          userId: chatbotUserId,
+          username: "Social AI",
+          profile_img: "socialfdasfAI",
+        },
+        ...response.data,
+      ]);
     } catch (error) {
       console.log(error);
       toast.error("Failed to fetch users.");
@@ -407,7 +416,9 @@ const Chat = () => {
                   <div className=" relative">
                     <img
                       src={
-                        item.profile_img.includes("googleusercontent")
+                        item.username == "Social AI"
+                          ? botImg
+                          : item.profile_img.includes("googleusercontent")
                           ? item.profile_img // Google profile image URL
                           : `${SERVER_URL}/${item.profile_img}` // Local image URL
                       }

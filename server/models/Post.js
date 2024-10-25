@@ -50,10 +50,16 @@ module.exports.FetchCommentByPost = async (postId) => {
   }
 };
 
-module.exports.AddComment = async (postId, comment, userId) => {
+module.exports.AddComment = async (postId, comment, userId, type) => {
   try {
-    let query = `UPDATE posts SET comments = JSON_ARRAY_APPEND(comments, '$', JSON_OBJECT('userid', ?, 'comment', ?, 'postId', ?)) WHERE postId = ?`;
-    return await db.runQuerySync(query, [userId, comment, postId, postId]);
+    let query = `UPDATE posts SET comments = JSON_ARRAY_APPEND(comments, '$', JSON_OBJECT('userid', ?, 'comment', ?, 'postId', ?, 'type' , ?)) WHERE postId = ?`;
+    return await db.runQuerySync(query, [
+      userId,
+      comment,
+      postId,
+      type,
+      postId,
+    ]);
   } catch (error) {
     console.error("Error adding comment:", error.message);
     console.error("Database error: Could not add comment to the post.");

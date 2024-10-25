@@ -12,6 +12,7 @@ const randomstring = require("randomstring");
 const createUniqueWord = require("./services/createUniqeId");
 const { AddChat } = require("./models/Chat");
 const { upload } = require("./config/multerConfig");
+const run = require("./services/gemini");
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
@@ -59,6 +60,21 @@ io.on("connection", (socket) => {
     const threadId = createUniqueWord(sender, receiver);
     const result = await AddChat(chatId, threadId, sender, receiver, message);
     io.emit("receive_message", result[0]);
+
+    if (receiver === "chatbot") {
+      const chatId = randomstring.generate();
+      const threadId = createUniqueWord(receiver, sender);
+      const chatbot_response = await run(message);
+      console.log("Chatbot Response:", chatbot_response);
+      const result = await AddChat(
+        chatId,
+        threadId,
+        receiver,
+        sender,
+        chatbot_response
+      );
+      io.emit("receive_message", result[0]);
+    }
   });
 
   socket.on("send_image", async ({ imageUrl, sender, receiver }) => {
@@ -176,6 +192,7 @@ io.on("connection", (socket) => {
       socket.emit("error_message", "Game does not exist");
     }
   });
+
   // Handle disconnect
   socket.on("disconnect", () => {
     const disconnectedUser = Array.from(onlineUsers.entries()).find(

@@ -36,8 +36,9 @@ const likePostSchema = Joi.object({
 
 const commentSchema = Joi.object({
   postId: Joi.string().required(),
-  comment: Joi.string().min(1).required(),
+  comment: Joi.required(),
   userId: Joi.string().required(),
+  type: Joi.string().required(),
 });
 
 const postIdQuerySchema = Joi.object({
@@ -126,16 +127,26 @@ module.exports.setLikePost = async (req, res) => {
 
 // Add a comment to a post
 module.exports.AddCommentByPostController = async (req, res) => {
-  const { error } = commentSchema.validate(req.body);
-  if (error) {
-    return res
-      .status(SERVER_BAD_REQUEST)
-      .json({ error: error.details[0].message });
-  }
-
-  const { postId, comment, userId } = req.body;
+  const { postId, comment, userId, type } = req.body;
   try {
-    const result = await AddComment(postId, comment, userId);
+    let finalComment;
+    if (type === "voice") {
+      if (req.file) {
+        finalComment = `${Date.now()}.mp3`;
+        try {
+          await fs.writeFileSync(`public/${finalComment}`, req.file.buffer);
+        } catch (fileError) {
+          console.error("Error saving file:", fileError.message);
+          return res
+            .status(SERVER_INTERNAL_ERROR)
+            .json({ error: "Failed to save profile picture." });
+        }
+      }
+    } else {
+      finalComment = comment;
+    }
+
+    const result = await AddComment(postId, finalComment, userId, type);
     res
       .status(SERVER_CREATED_HTTP_CODE)
       .json({ result, message: "Comment added successfully!" });
