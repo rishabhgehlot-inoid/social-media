@@ -39,14 +39,6 @@ module.exports.AddChat = async (req, res) => {
 };
 
 module.exports.fetchChats = async (req, res) => {
-  // const { error } = chatSchema.validate(req.body);
-  // console.log("i am callling---------------------------->");
-  // if (error) {
-  //   return res
-  //     .status(SERVER_BAD_REQUEST)
-  //     .json({ error: error.details[0].message });
-  // }
-
   const { sender, receiver } = req.body;
   const threadId = createUniqueWord(sender, receiver);
   console.log("i am callling---------------------------->");
